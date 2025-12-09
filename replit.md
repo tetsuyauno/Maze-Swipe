@@ -2,7 +2,7 @@
 
 ## Overview
 
-A 7×7 maze puzzle game built with React Native and Expo. Players navigate through procedurally designed mazes using swipe gestures. The app features a dark theme with vibrant accent colors, haptic feedback, and smooth animations. No authentication is required as this is a single-user local puzzle game.
+A 7×7 maze puzzle game built with React Native and Expo. Players navigate through procedurally designed mazes by tapping on cells - the car moves to the tapped cell if a valid path exists. The app features a child-friendly design with peach/cream colors, haptic feedback, smooth animations, confetti celebrations, and star ratings. No authentication is required as this is a single-user local puzzle game.
 
 ## User Preferences
 
@@ -15,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **Navigation**: React Navigation with native stack navigator (stack-only, no tabs)
 - **State Management**: React hooks for local state, TanStack React Query for server state
 - **Animations**: React Native Reanimated for smooth, performant animations
-- **Gestures**: React Native Gesture Handler with PanResponder for swipe detection
+- **Gestures**: React Native Gesture Handler with Tap gesture for tap-to-move navigation
 - **Styling**: StyleSheet API with a centralized theme system in `client/constants/theme.ts`
 
 ### Directory Structure
@@ -49,9 +49,12 @@ Preferred communication style: Simple, everyday language.
 
 ### Game Mechanics
 - Maze data stored as grid of cells with wall definitions (north, south, east, west booleans)
-- Player movement via swipe gestures with minimum 40px threshold
+- Player movement via tap-to-move: tap any cell and the car moves there if a valid path exists
+- BFS pathfinding algorithm finds the shortest path to the target cell
+- Move counter increments by the number of cells in the path (not just one per tap)
 - Wall collision detection based on cell wall properties
-- Haptic feedback on movement and collisions
+- Haptic feedback on movement and blocked moves
+- Confetti animation and star rating (1-3 stars based on moves) when reaching goal
 
 ## External Dependencies
 

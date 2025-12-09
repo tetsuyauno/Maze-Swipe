@@ -29,52 +29,79 @@ import { LEVEL_1_DATA, CellWalls } from "@/data/Mazes";
 
 const GRID_SIZE = 7;
 const WALL_THICKNESS = 4;
-const MIN_SWIPE_DISTANCE = 20;
 
-type Direction = "up" | "down" | "left" | "right";
 type Position = { y: number; x: number };
 
-function findFurthestPosition(
-  start: Position,
-  direction: Direction,
-  grid: CellWalls[][]
-): Position {
-  let current = { ...start };
+function canMoveBetween(from: Position, to: Position, grid: CellWalls[][]): boolean {
+  const fromCell = grid[from.y][from.x];
   
-  const canMoveFrom = (pos: Position, dir: Direction): boolean => {
-    const cell = grid[pos.y][pos.x];
-    switch (dir) {
-      case "up":
-        return !cell.north && pos.y > 0;
-      case "down":
-        return !cell.south && pos.y < GRID_SIZE - 1;
-      case "left":
-        return !cell.west && pos.x > 0;
-      case "right":
-        return !cell.east && pos.x < GRID_SIZE - 1;
-      default:
-        return false;
-    }
-  };
+  if (to.y === from.y - 1 && to.x === from.x) {
+    return !fromCell.north;
+  }
+  if (to.y === from.y + 1 && to.x === from.x) {
+    return !fromCell.south;
+  }
+  if (to.x === from.x - 1 && to.y === from.y) {
+    return !fromCell.west;
+  }
+  if (to.x === from.x + 1 && to.y === from.y) {
+    return !fromCell.east;
+  }
+  return false;
+}
 
-  while (canMoveFrom(current, direction)) {
-    switch (direction) {
-      case "up":
-        current = { ...current, y: current.y - 1 };
-        break;
-      case "down":
-        current = { ...current, y: current.y + 1 };
-        break;
-      case "left":
-        current = { ...current, x: current.x - 1 };
-        break;
-      case "right":
-        current = { ...current, x: current.x + 1 };
-        break;
+function findPathToTarget(
+  start: Position,
+  target: Position,
+  grid: CellWalls[][]
+): Position[] | null {
+  if (target.x < 0 || target.x >= GRID_SIZE || target.y < 0 || target.y >= GRID_SIZE) {
+    return null;
+  }
+  
+  if (start.x === target.x && start.y === target.y) {
+    return [];
+  }
+
+  const queue: { pos: Position; path: Position[] }[] = [{ pos: start, path: [] }];
+  const visited = new Set<string>();
+  visited.add(`${start.y},${start.x}`);
+
+  const directions = [
+    { dy: -1, dx: 0 },
+    { dy: 1, dx: 0 },
+    { dy: 0, dx: -1 },
+    { dy: 0, dx: 1 },
+  ];
+
+  while (queue.length > 0) {
+    const { pos, path } = queue.shift()!;
+
+    for (const dir of directions) {
+      const nextPos = { y: pos.y + dir.dy, x: pos.x + dir.dx };
+      const key = `${nextPos.y},${nextPos.x}`;
+
+      if (
+        nextPos.x >= 0 &&
+        nextPos.x < GRID_SIZE &&
+        nextPos.y >= 0 &&
+        nextPos.y < GRID_SIZE &&
+        !visited.has(key) &&
+        canMoveBetween(pos, nextPos, grid)
+      ) {
+        const newPath = [...path, nextPos];
+
+        if (nextPos.x === target.x && nextPos.y === target.y) {
+          return newPath;
+        }
+
+        visited.add(key);
+        queue.push({ pos: nextPos, path: newPath });
+      }
     }
   }
 
-  return current;
+  return null;
 }
 
 function ConfettiPiece({ delay, color }: { delay: number; color: string }) {
@@ -211,36 +238,44 @@ export default function GameScreen() {
     }
   }, [playerScale]);
 
-  const handleSwipe = useCallback((direction: Direction) => {
-    const currentPos = playerPositionRef.current;
-    const newPosition = findFurthestPosition(
-      currentPos,
-      direction,
-      LEVEL_1_DATA.grid
-    );
+  const gridLayoutRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-    if (newPosition.x !== currentPos.x || newPosition.y !== currentPos.y) {
-      setPlayerPosition(newPosition);
-      setMoveCount((prev) => prev + 1);
+  const handleTapAtPosition = useCallback((touchX: number, touchY: number) => {
+    const gridX = gridLayoutRef.current.x;
+    const gridY = gridLayoutRef.current.y;
+    
+    const relativeX = touchX - gridX;
+    const relativeY = touchY - gridY;
+    
+    const targetCol = Math.floor(relativeX / cellSize);
+    const targetRow = Math.floor(relativeY / cellSize);
+    
+    if (targetCol < 0 || targetCol >= GRID_SIZE || targetRow < 0 || targetRow >= GRID_SIZE) {
+      triggerShake();
+      return;
+    }
+    
+    const target: Position = { y: targetRow, x: targetCol };
+    const currentPos = playerPositionRef.current;
+    
+    if (target.x === currentPos.x && target.y === currentPos.y) {
+      return;
+    }
+    
+    const path = findPathToTarget(currentPos, target, LEVEL_1_DATA.grid);
+    
+    if (path && path.length > 0) {
+      setPlayerPosition(target);
+      setMoveCount((prev) => prev + path.length);
       triggerMoveAnimation();
     } else {
       triggerShake();
     }
-  }, [triggerMoveAnimation, triggerShake]);
+  }, [cellSize, triggerMoveAnimation, triggerShake]);
 
-  const panGesture = Gesture.Pan()
-    .minDistance(MIN_SWIPE_DISTANCE)
+  const tapGesture = Gesture.Tap()
     .onEnd((event) => {
-      const { translationX, translationY } = event;
-      
-      let direction: Direction;
-      if (Math.abs(translationX) > Math.abs(translationY)) {
-        direction = translationX > 0 ? "right" : "left";
-      } else {
-        direction = translationY > 0 ? "down" : "up";
-      }
-
-      runOnJS(handleSwipe)(direction);
+      runOnJS(handleTapAtPosition)(event.absoluteX, event.absoluteY);
     });
 
   const resetGame = useCallback(() => {
@@ -317,8 +352,15 @@ export default function GameScreen() {
           </View>
         </View>
 
-        <GestureDetector gesture={panGesture}>
-          <View style={styles.gridWrapper}>
+        <GestureDetector gesture={tapGesture}>
+          <View 
+            style={styles.gridWrapper}
+            onLayout={(event) => {
+              event.target.measure((x, y, width, height, pageX, pageY) => {
+                gridLayoutRef.current = { x: pageX, y: pageY };
+              });
+            }}
+          >
             <View style={styles.gridContainer}>
               {LEVEL_1_DATA.grid.map((row, rowIndex) => (
                 <View key={rowIndex} style={styles.row}>
@@ -329,9 +371,9 @@ export default function GameScreen() {
           </View>
         </GestureDetector>
 
-        <ThemedText style={styles.instructionText}>Swipe to drive!</ThemedText>
+        <ThemedText style={styles.instructionText}>Tap to drive!</ThemedText>
         <ThemedText style={styles.tipText}>
-          The car slides until it hits a wall
+          Tap any cell to move there
         </ThemedText>
       </View>
 
