@@ -1,21 +1,16 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import {
   View,
   StyleSheet,
   Dimensions,
   PanResponder,
-  Pressable,
   Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Feather } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withSequence,
   withTiming,
 } from "react-native-reanimated";
@@ -24,7 +19,6 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, MazeColors } from "@/constants/theme";
 import { LEVEL_1_DATA } from "@/data/Mazes";
-import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const GRID_SIZE = 7;
 const WALL_THICKNESS = 3;
@@ -35,8 +29,6 @@ type Direction = "up" | "down" | "left" | "right";
 export default function GameScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [playerPosition, setPlayerPosition] = useState({
     y: LEVEL_1_DATA.start.y,
@@ -45,8 +37,8 @@ export default function GameScreen() {
 
   const screenWidth = Dimensions.get("window").width;
   const gridPadding = Spacing.xl * 2;
-  const cellSize = (screenWidth - gridPadding) / GRID_SIZE;
-  const playerSize = cellSize * 0.6;
+  const cellSize = Math.floor((screenWidth - gridPadding) / GRID_SIZE);
+  const playerSize = Math.floor(cellSize * 0.6);
 
   const shakeX = useSharedValue(0);
 
@@ -114,31 +106,33 @@ export default function GameScreen() {
     [canMove, triggerShake]
   );
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderRelease: (_, gestureState) => {
-        const { dx, dy } = gestureState;
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderRelease: (_, gestureState) => {
+          const { dx, dy } = gestureState;
 
-        if (
-          Math.abs(dx) < MIN_SWIPE_DISTANCE &&
-          Math.abs(dy) < MIN_SWIPE_DISTANCE
-        ) {
-          return;
-        }
+          if (
+            Math.abs(dx) < MIN_SWIPE_DISTANCE &&
+            Math.abs(dy) < MIN_SWIPE_DISTANCE
+          ) {
+            return;
+          }
 
-        let direction: Direction;
-        if (Math.abs(dx) > Math.abs(dy)) {
-          direction = dx > 0 ? "right" : "left";
-        } else {
-          direction = dy > 0 ? "down" : "up";
-        }
+          let direction: Direction;
+          if (Math.abs(dx) > Math.abs(dy)) {
+            direction = dx > 0 ? "right" : "left";
+          } else {
+            direction = dy > 0 ? "down" : "up";
+          }
 
-        movePlayer(direction);
-      },
-    })
-  ).current;
+          movePlayer(direction);
+        },
+      }),
+    [movePlayer]
+  );
 
   const renderCell = (rowIndex: number, colIndex: number) => {
     const cell = LEVEL_1_DATA.grid[rowIndex][colIndex];
@@ -193,14 +187,6 @@ export default function GameScreen() {
     );
   };
 
-  const renderGrid = () => {
-    return LEVEL_1_DATA.grid.map((row, rowIndex) => (
-      <View key={rowIndex} style={styles.row}>
-        {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
-      </View>
-    ));
-  };
-
   return (
     <View
       style={[
@@ -211,23 +197,13 @@ export default function GameScreen() {
         },
       ]}
     >
-      <Pressable
-        style={({ pressed }) => [
-          styles.settingsButton,
-          {
-            top: headerHeight - 40,
-            opacity: pressed ? 0.7 : 1,
-            transform: [{ scale: pressed ? 0.95 : 1 }],
-          },
-        ]}
-        onPress={() => navigation.navigate("Settings")}
-      >
-        <Feather name="settings" size={24} color={MazeColors.textPrimary} />
-      </Pressable>
-
       <View style={styles.content}>
         <View {...panResponder.panHandlers} style={styles.gridContainer}>
-          {renderGrid()}
+          {LEVEL_1_DATA.grid.map((row, rowIndex) => (
+            <View key={rowIndex} style={styles.row}>
+              {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
+            </View>
+          ))}
         </View>
 
         <ThemedText style={styles.instructionText}>Swipe to move</ThemedText>
@@ -247,15 +223,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: Spacing.xl,
   },
-  settingsButton: {
-    position: "absolute",
-    right: Spacing.lg,
-    width: 44,
-    height: 44,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-  },
   gridContainer: {
     flexDirection: "column",
   },
@@ -268,11 +235,6 @@ const styles = StyleSheet.create({
   },
   player: {
     backgroundColor: MazeColors.player,
-    shadowColor: MazeColors.player,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
   },
   goalMarker: {
     backgroundColor: MazeColors.success,

@@ -1,9 +1,12 @@
 import React from "react";
+import { Pressable } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
 import GameScreen from "@/screens/GameScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
+import { MazeColors } from "@/constants/theme";
 
 export type RootStackParamList = {
   Game: undefined;
@@ -20,9 +23,20 @@ export default function RootStackNavigator() {
       <Stack.Screen
         name="Game"
         component={GameScreen}
-        options={{
+        options={({ navigation }) => ({
           headerTitle: () => <HeaderTitle title="Maze Level 1" />,
-        }}
+          headerRight: () => (
+            <Pressable
+              onPress={() => navigation.navigate("Settings")}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+                padding: 8,
+              })}
+            >
+              <Feather name="settings" size={24} color={MazeColors.textPrimary} />
+            </Pressable>
+          ),
+        })}
       />
       <Stack.Screen
         name="Settings"
