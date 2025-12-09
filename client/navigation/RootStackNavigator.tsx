@@ -1,6 +1,6 @@
 import React from "react";
-import { Pressable } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { HeaderButton } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import MenuScreen from "@/screens/MenuScreen";
 import GameScreen from "@/screens/GameScreen";
@@ -39,15 +39,9 @@ export default function RootStackNavigator() {
         options={({ navigation }) => ({
           headerTitle: () => <HeaderTitle title="Maze Adventure" />,
           headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate("Settings")}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.7 : 1,
-                padding: 8,
-              })}
-            >
+            <HeaderButton onPress={() => navigation.navigate("Settings")}>
               <Feather name="settings" size={24} color={MazeColors.textPrimary} />
-            </Pressable>
+            </HeaderButton>
           ),
         })}
       />
