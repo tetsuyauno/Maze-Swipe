@@ -15,12 +15,12 @@ export default function SettingsScreen() {
 
   const handleResetProgress = () => {
     Alert.alert(
-      "Reset Progress",
-      "Are you sure you want to reset all progress? This cannot be undone.",
+      "Start Over?",
+      "Are you sure you want to start the game from the beginning?",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "No, Keep Playing", style: "cancel" },
         {
-          text: "Reset",
+          text: "Yes, Start Over",
           style: "destructive",
           onPress: () => {
             navigation.goBack();
@@ -46,8 +46,8 @@ export default function SettingsScreen() {
           <Switch
             value={soundEnabled}
             onValueChange={setSoundEnabled}
-            trackColor={{ false: MazeColors.disabled, true: MazeColors.accent }}
-            thumbColor={soundEnabled ? MazeColors.player : MazeColors.textSecondary}
+            trackColor={{ false: MazeColors.disabled, true: MazeColors.success }}
+            thumbColor={soundEnabled ? "#FFFFFF" : "#FFFFFF"}
           />
         </View>
 
@@ -56,8 +56,8 @@ export default function SettingsScreen() {
           <Switch
             value={hapticEnabled}
             onValueChange={setHapticEnabled}
-            trackColor={{ false: MazeColors.disabled, true: MazeColors.accent }}
-            thumbColor={hapticEnabled ? MazeColors.player : MazeColors.textSecondary}
+            trackColor={{ false: MazeColors.disabled, true: MazeColors.success }}
+            thumbColor={hapticEnabled ? "#FFFFFF" : "#FFFFFF"}
           />
         </View>
       </View>
@@ -73,7 +73,7 @@ export default function SettingsScreen() {
           ]}
           onPress={handleResetProgress}
         >
-          <ThemedText style={styles.resetButtonText}>Reset Progress</ThemedText>
+          <ThemedText style={styles.resetButtonText}>Start Over</ThemedText>
         </Pressable>
       </View>
     </View>
@@ -91,6 +91,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     padding: Spacing.lg,
     gap: Spacing.lg,
+    borderWidth: 2,
+    borderColor: MazeColors.walls,
   },
   settingRow: {
     flexDirection: "row",
@@ -99,21 +101,21 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
     color: MazeColors.textPrimary,
   },
   dangerSection: {
     marginTop: Spacing.xl,
   },
   resetButton: {
-    backgroundColor: "#DC3545",
+    backgroundColor: MazeColors.player,
     paddingVertical: Spacing.lg,
     borderRadius: BorderRadius.md,
     alignItems: "center",
   },
   resetButtonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#FFFFFF",
   },
 });

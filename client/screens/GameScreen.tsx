@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { Feather } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -21,7 +22,7 @@ import { Spacing, MazeColors } from "@/constants/theme";
 import { LEVEL_1_DATA } from "@/data/Mazes";
 
 const GRID_SIZE = 7;
-const WALL_THICKNESS = 3;
+const WALL_THICKNESS = 4;
 const MIN_SWIPE_DISTANCE = 40;
 
 type Direction = "up" | "down" | "left" | "right";
@@ -38,7 +39,7 @@ export default function GameScreen() {
   const screenWidth = Dimensions.get("window").width;
   const gridPadding = Spacing.xl * 2;
   const cellSize = Math.floor((screenWidth - gridPadding) / GRID_SIZE);
-  const playerSize = Math.floor(cellSize * 0.6);
+  const iconSize = Math.floor(cellSize * 0.55);
 
   const shakeX = useSharedValue(0);
 
@@ -149,7 +150,7 @@ export default function GameScreen() {
           {
             width: cellSize,
             height: cellSize,
-            backgroundColor: isEnd ? MazeColors.success + "33" : MazeColors.gridPath,
+            backgroundColor: isEnd ? "#90EE90" : MazeColors.gridPath,
             borderTopWidth: cell.north ? WALL_THICKNESS : 0,
             borderBottomWidth: cell.south ? WALL_THICKNESS : 0,
             borderLeftWidth: cell.west ? WALL_THICKNESS : 0,
@@ -159,29 +160,16 @@ export default function GameScreen() {
         ]}
       >
         {isPlayer ? (
-          <Animated.View
-            style={[
-              styles.player,
-              animatedPlayerStyle,
-              {
-                width: playerSize,
-                height: playerSize,
-                borderRadius: playerSize / 2,
-              },
-            ]}
-          />
+          <Animated.View style={[styles.playerContainer, animatedPlayerStyle]}>
+            <View style={styles.carContainer}>
+              <Feather name="truck" size={iconSize} color={MazeColors.player} />
+            </View>
+          </Animated.View>
         ) : null}
         {isEnd && !isPlayer ? (
-          <View
-            style={[
-              styles.goalMarker,
-              {
-                width: playerSize * 0.5,
-                height: playerSize * 0.5,
-                borderRadius: playerSize * 0.25,
-              },
-            ]}
-          />
+          <View style={styles.goalContainer}>
+            <Feather name="flag" size={iconSize * 0.7} color={MazeColors.success} />
+          </View>
         ) : null}
       </View>
     );
@@ -198,15 +186,17 @@ export default function GameScreen() {
       ]}
     >
       <View style={styles.content}>
-        <View {...panResponder.panHandlers} style={styles.gridContainer}>
-          {LEVEL_1_DATA.grid.map((row, rowIndex) => (
-            <View key={rowIndex} style={styles.row}>
-              {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
-            </View>
-          ))}
+        <View style={styles.gridWrapper}>
+          <View {...panResponder.panHandlers} style={styles.gridContainer}>
+            {LEVEL_1_DATA.grid.map((row, rowIndex) => (
+              <View key={rowIndex} style={styles.row}>
+                {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
+              </View>
+            ))}
+          </View>
         </View>
 
-        <ThemedText style={styles.instructionText}>Swipe to move</ThemedText>
+        <ThemedText style={styles.instructionText}>Swipe to drive!</ThemedText>
       </View>
     </View>
   );
@@ -223,6 +213,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: Spacing.xl,
   },
+  gridWrapper: {
+    borderRadius: 16,
+    overflow: "hidden",
+    borderWidth: 4,
+    borderColor: MazeColors.walls,
+  },
   gridContainer: {
     flexDirection: "column",
   },
@@ -233,16 +229,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  player: {
-    backgroundColor: MazeColors.player,
+  playerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
-  goalMarker: {
-    backgroundColor: MazeColors.success,
-    opacity: 0.8,
+  carContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  goalContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   instructionText: {
     marginTop: Spacing.xl,
-    fontSize: 14,
-    color: MazeColors.textSecondary,
+    fontSize: 18,
+    fontWeight: "600",
+    color: MazeColors.textPrimary,
   },
 });

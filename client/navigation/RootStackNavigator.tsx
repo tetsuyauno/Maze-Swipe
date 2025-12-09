@@ -24,7 +24,7 @@ export default function RootStackNavigator() {
         name="Game"
         component={GameScreen}
         options={({ navigation }) => ({
-          headerTitle: () => <HeaderTitle title="Maze Level 1" />,
+          headerTitle: () => <HeaderTitle title="Maze Adventure" />,
           headerRight: () => (
             <Pressable
               onPress={() => navigation.navigate("Settings")}

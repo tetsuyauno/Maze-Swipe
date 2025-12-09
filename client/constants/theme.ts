@@ -1,19 +1,20 @@
 import { Platform } from "react-native";
 
 export const MazeColors = {
-  background: "#1A1A2E",
-  gridPath: "#16213E",
-  walls: "#0F3460",
-  player: "#E94560",
-  accent: "#533483",
-  textPrimary: "#FFFFFF",
-  textSecondary: "#A0A0B0",
-  success: "#4ECDC4",
-  disabled: "#4A4A5A",
+  background: "#FFE5B4",
+  gridPath: "#FFF8DC",
+  walls: "#8B4513",
+  player: "#FF6B35",
+  accent: "#9B59B6",
+  textPrimary: "#2C3E50",
+  textSecondary: "#7F8C8D",
+  success: "#2ECC71",
+  disabled: "#BDC3C7",
+  headerBg: "#87CEEB",
 };
 
-const tintColorLight = "#E94560";
-const tintColorDark = "#E94560";
+const tintColorLight = "#FF6B35";
+const tintColorDark = "#FF6B35";
 
 export const Colors = {
   light: {

@@ -34,8 +34,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "700",
     color: MazeColors.textPrimary,
   },
 });
