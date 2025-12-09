@@ -167,9 +167,13 @@ export default function GameScreen() {
   const [moveCount, setMoveCount] = useState(0);
   const [showWinModal, setShowWinModal] = useState(false);
   const [hasWon, setHasWon] = useState(false);
+  const [drawnPath, setDrawnPath] = useState<Position[]>([]);
 
   const playerPositionRef = useRef(playerPosition);
   playerPositionRef.current = playerPosition;
+  
+  const drawnPathRef = useRef<Position[]>([]);
+  const isDrawingRef = useRef(false);
 
   const screenWidth = Dimensions.get("window").width;
   const gridPadding = Spacing.md * 2;
@@ -239,43 +243,121 @@ export default function GameScreen() {
   }, [playerScale]);
 
   const gridLayoutRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const gridViewRef = useRef<View>(null);
+  const cellSizeRef = useRef(cellSize);
+  cellSizeRef.current = cellSize;
 
-  const handleTapAtPosition = useCallback((touchX: number, touchY: number) => {
+  const updateGridPosition = useCallback(() => {
+    if (gridViewRef.current && typeof (gridViewRef.current as any).measureInWindow === 'function') {
+      (gridViewRef.current as any).measureInWindow((x: number, y: number) => {
+        gridLayoutRef.current = { x, y };
+      });
+    }
+  }, []);
+
+  const getCellFromTouch = useCallback((touchX: number, touchY: number): Position | null => {
     const gridX = gridLayoutRef.current.x;
     const gridY = gridLayoutRef.current.y;
+    const size = cellSizeRef.current;
     
     const relativeX = touchX - gridX;
     const relativeY = touchY - gridY;
     
-    const targetCol = Math.floor(relativeX / cellSize);
-    const targetRow = Math.floor(relativeY / cellSize);
+    const col = Math.floor(relativeX / size);
+    const row = Math.floor(relativeY / size);
     
-    if (targetCol < 0 || targetCol >= GRID_SIZE || targetRow < 0 || targetRow >= GRID_SIZE) {
-      triggerShake();
-      return;
+    if (col < 0 || col >= GRID_SIZE || row < 0 || row >= GRID_SIZE) {
+      return null;
     }
     
-    const target: Position = { y: targetRow, x: targetCol };
+    return { y: row, x: col };
+  }, []);
+
+  const handlePanStart = useCallback((touchX: number, touchY: number) => {
+    const cell = getCellFromTouch(touchX, touchY);
     const currentPos = playerPositionRef.current;
     
-    if (target.x === currentPos.x && target.y === currentPos.y) {
+    if (cell && cell.x === currentPos.x && cell.y === currentPos.y) {
+      isDrawingRef.current = true;
+      drawnPathRef.current = [currentPos];
+      setDrawnPath([currentPos]);
+    } else {
+      isDrawingRef.current = false;
+      drawnPathRef.current = [];
+      setDrawnPath([]);
+    }
+  }, [getCellFromTouch]);
+
+  const handlePanUpdate = useCallback((touchX: number, touchY: number) => {
+    if (!isDrawingRef.current) return;
+    
+    const cell = getCellFromTouch(touchX, touchY);
+    if (!cell) return;
+    
+    const currentPath = drawnPathRef.current;
+    if (currentPath.length === 0) return;
+    
+    const lastCell = currentPath[currentPath.length - 1];
+    
+    if (cell.x === lastCell.x && cell.y === lastCell.y) {
       return;
     }
     
-    const path = findPathToTarget(currentPos, target, LEVEL_1_DATA.grid);
-    
-    if (path && path.length > 0) {
-      setPlayerPosition(target);
-      setMoveCount((prev) => prev + path.length);
-      triggerMoveAnimation();
-    } else {
-      triggerShake();
+    const existingIndex = currentPath.findIndex(p => p.x === cell.x && p.y === cell.y);
+    if (existingIndex !== -1) {
+      const newPath = currentPath.slice(0, existingIndex + 1);
+      drawnPathRef.current = newPath;
+      setDrawnPath([...newPath]);
+      return;
     }
-  }, [cellSize, triggerMoveAnimation, triggerShake]);
+    
+    const isAdjacent = 
+      (Math.abs(cell.x - lastCell.x) === 1 && cell.y === lastCell.y) ||
+      (Math.abs(cell.y - lastCell.y) === 1 && cell.x === lastCell.x);
+    
+    if (!isAdjacent) return;
+    
+    if (canMoveBetween(lastCell, cell, LEVEL_1_DATA.grid)) {
+      const newPath = [...currentPath, cell];
+      drawnPathRef.current = newPath;
+      setDrawnPath([...newPath]);
+      
+      if (Platform.OS !== "web") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    }
+  }, [getCellFromTouch]);
 
-  const tapGesture = Gesture.Tap()
-    .onEnd((event) => {
-      runOnJS(handleTapAtPosition)(event.absoluteX, event.absoluteY);
+  const handlePanEnd = useCallback(() => {
+    if (!isDrawingRef.current) {
+      setDrawnPath([]);
+      return;
+    }
+    
+    const path = drawnPathRef.current;
+    
+    if (path.length > 1) {
+      const finalPosition = path[path.length - 1];
+      setPlayerPosition(finalPosition);
+      setMoveCount((prev) => prev + (path.length - 1));
+      triggerMoveAnimation();
+    }
+    
+    isDrawingRef.current = false;
+    drawnPathRef.current = [];
+    setDrawnPath([]);
+  }, [triggerMoveAnimation]);
+
+  const panGesture = Gesture.Pan()
+    .minDistance(0)
+    .onStart((event) => {
+      runOnJS(handlePanStart)(event.absoluteX, event.absoluteY);
+    })
+    .onUpdate((event) => {
+      runOnJS(handlePanUpdate)(event.absoluteX, event.absoluteY);
+    })
+    .onEnd(() => {
+      runOnJS(handlePanEnd)();
     });
 
   const resetGame = useCallback(() => {
@@ -300,6 +382,7 @@ export default function GameScreen() {
       playerPosition.y === rowIndex && playerPosition.x === colIndex;
     const isEnd =
       LEVEL_1_DATA.end.y === rowIndex && LEVEL_1_DATA.end.x === colIndex;
+    const isInPath = drawnPath.some(p => p.y === rowIndex && p.x === colIndex);
 
     return (
       <View
@@ -309,7 +392,11 @@ export default function GameScreen() {
           {
             width: cellSize,
             height: cellSize,
-            backgroundColor: isEnd ? "#90EE90" : MazeColors.gridPath,
+            backgroundColor: isInPath 
+              ? "rgba(255, 165, 0, 0.4)" 
+              : isEnd 
+                ? "#90EE90" 
+                : MazeColors.gridPath,
             borderTopWidth: cell.north ? WALL_THICKNESS : 0,
             borderBottomWidth: cell.south ? WALL_THICKNESS : 0,
             borderLeftWidth: cell.west ? WALL_THICKNESS : 0,
@@ -318,6 +405,9 @@ export default function GameScreen() {
           },
         ]}
       >
+        {isInPath && !isPlayer ? (
+          <View style={[styles.pathDot, { width: cellSize * 0.3, height: cellSize * 0.3 }]} />
+        ) : null}
         {isPlayer ? (
           <Animated.View style={[styles.playerContainer, animatedPlayerStyle]}>
             <View style={styles.carContainer}>
@@ -325,7 +415,7 @@ export default function GameScreen() {
             </View>
           </Animated.View>
         ) : null}
-        {isEnd && !isPlayer ? (
+        {isEnd && !isPlayer && !isInPath ? (
           <Animated.View style={[styles.goalContainer, animatedGoalStyle]}>
             <Feather name="flag" size={iconSize * 0.7} color={MazeColors.success} />
           </Animated.View>
@@ -352,14 +442,11 @@ export default function GameScreen() {
           </View>
         </View>
 
-        <GestureDetector gesture={tapGesture}>
+        <GestureDetector gesture={panGesture}>
           <View 
+            ref={gridViewRef}
             style={styles.gridWrapper}
-            onLayout={(event) => {
-              event.target.measure((x, y, width, height, pageX, pageY) => {
-                gridLayoutRef.current = { x: pageX, y: pageY };
-              });
-            }}
+            onLayout={updateGridPosition}
           >
             <View style={styles.gridContainer}>
               {LEVEL_1_DATA.grid.map((row, rowIndex) => (
@@ -371,9 +458,9 @@ export default function GameScreen() {
           </View>
         </GestureDetector>
 
-        <ThemedText style={styles.instructionText}>Tap to drive!</ThemedText>
+        <ThemedText style={styles.instructionText}>Draw to drive!</ThemedText>
         <ThemedText style={styles.tipText}>
-          Tap any cell to move there
+          Draw a path from the car to move
         </ThemedText>
       </View>
 
@@ -473,6 +560,10 @@ const styles = StyleSheet.create({
   goalContainer: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  pathDot: {
+    backgroundColor: "rgba(255, 140, 0, 0.8)",
+    borderRadius: 100,
   },
   instructionText: {
     marginTop: Spacing.md,
