@@ -6,6 +6,7 @@ import {
   Platform,
   Modal,
   Pressable,
+  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -22,15 +23,21 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import type { RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, MazeColors } from "@/constants/theme";
-import { LEVEL_1_DATA, CellWalls } from "@/data/Mazes";
+import { CellWalls, getRandomMaze, MazeData, CarIconName } from "@/data/Mazes";
+import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const GRID_SIZE = 7;
 const WALL_THICKNESS = 4;
 
 type Position = { y: number; x: number };
+type GameRouteProp = RouteProp<RootStackParamList, "Game">;
+type GameNavProp = NativeStackNavigationProp<RootStackParamList, "Game">;
 
 function canMoveBetween(from: Position, to: Position, grid: CellWalls[][]): boolean {
   const fromCell = grid[from.y][from.x];
@@ -48,60 +55,6 @@ function canMoveBetween(from: Position, to: Position, grid: CellWalls[][]): bool
     return !fromCell.east;
   }
   return false;
-}
-
-function findPathToTarget(
-  start: Position,
-  target: Position,
-  grid: CellWalls[][]
-): Position[] | null {
-  if (target.x < 0 || target.x >= GRID_SIZE || target.y < 0 || target.y >= GRID_SIZE) {
-    return null;
-  }
-  
-  if (start.x === target.x && start.y === target.y) {
-    return [];
-  }
-
-  const queue: { pos: Position; path: Position[] }[] = [{ pos: start, path: [] }];
-  const visited = new Set<string>();
-  visited.add(`${start.y},${start.x}`);
-
-  const directions = [
-    { dy: -1, dx: 0 },
-    { dy: 1, dx: 0 },
-    { dy: 0, dx: -1 },
-    { dy: 0, dx: 1 },
-  ];
-
-  while (queue.length > 0) {
-    const { pos, path } = queue.shift()!;
-
-    for (const dir of directions) {
-      const nextPos = { y: pos.y + dir.dy, x: pos.x + dir.dx };
-      const key = `${nextPos.y},${nextPos.x}`;
-
-      if (
-        nextPos.x >= 0 &&
-        nextPos.x < GRID_SIZE &&
-        nextPos.y >= 0 &&
-        nextPos.y < GRID_SIZE &&
-        !visited.has(key) &&
-        canMoveBetween(pos, nextPos, grid)
-      ) {
-        const newPath = [...path, nextPos];
-
-        if (nextPos.x === target.x && nextPos.y === target.y) {
-          return newPath;
-        }
-
-        visited.add(key);
-        queue.push({ pos: nextPos, path: newPath });
-      }
-    }
-  }
-
-  return null;
 }
 
 function ConfettiPiece({ delay, color }: { delay: number; color: string }) {
@@ -157,17 +110,25 @@ function Confetti() {
 }
 
 export default function GameScreen() {
+  const route = useRoute<GameRouteProp>();
+  const navigation = useNavigation<GameNavProp>();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
+  const { level, carIcon } = route.params;
+
+  const [currentMaze, setCurrentMaze] = useState<MazeData>(() => getRandomMaze(level));
   const [playerPosition, setPlayerPosition] = useState<Position>({
-    y: LEVEL_1_DATA.start.y,
-    x: LEVEL_1_DATA.start.x,
+    y: currentMaze.start.y,
+    x: currentMaze.start.x,
   });
   const [moveCount, setMoveCount] = useState(0);
   const [showWinModal, setShowWinModal] = useState(false);
   const [hasWon, setHasWon] = useState(false);
   const [drawnPath, setDrawnPath] = useState<Position[]>([]);
+
+  const currentMazeRef = useRef(currentMaze);
+  currentMazeRef.current = currentMaze;
 
   const playerPositionRef = useRef(playerPosition);
   playerPositionRef.current = playerPosition;
@@ -197,8 +158,8 @@ export default function GameScreen() {
 
   useEffect(() => {
     if (
-      playerPosition.y === LEVEL_1_DATA.end.y &&
-      playerPosition.x === LEVEL_1_DATA.end.x &&
+      playerPosition.y === currentMaze.end.y &&
+      playerPosition.x === currentMaze.end.x &&
       !hasWon
     ) {
       setHasWon(true);
@@ -207,7 +168,7 @@ export default function GameScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     }
-  }, [playerPosition, hasWon]);
+  }, [playerPosition, hasWon, currentMaze.end]);
 
   const animatedPlayerStyle = useAnimatedStyle(() => ({
     transform: [
@@ -219,18 +180,6 @@ export default function GameScreen() {
   const animatedGoalStyle = useAnimatedStyle(() => ({
     transform: [{ scale: goalPulse.value }],
   }));
-
-  const triggerShake = useCallback(() => {
-    shakeX.value = withSequence(
-      withTiming(5, { duration: 50 }),
-      withTiming(-5, { duration: 50 }),
-      withTiming(5, { duration: 50 }),
-      withTiming(0, { duration: 50 })
-    );
-    if (Platform.OS !== "web") {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    }
-  }, [shakeX]);
 
   const triggerMoveAnimation = useCallback(() => {
     playerScale.value = withSequence(
@@ -317,7 +266,7 @@ export default function GameScreen() {
     
     if (!isAdjacent) return;
     
-    if (canMoveBetween(lastCell, cell, LEVEL_1_DATA.grid)) {
+    if (canMoveBetween(lastCell, cell, currentMazeRef.current.grid)) {
       const newPath = [...currentPath, cell];
       drawnPathRef.current = newPath;
       setDrawnPath([...newPath]);
@@ -360,28 +309,47 @@ export default function GameScreen() {
       runOnJS(handlePanEnd)();
     });
 
-  const resetGame = useCallback(() => {
-    setPlayerPosition({
-      y: LEVEL_1_DATA.start.y,
-      x: LEVEL_1_DATA.start.x,
-    });
+  const playNewMazeSameLevel = useCallback(() => {
+    const newMaze = getRandomMaze(level);
+    setCurrentMaze(newMaze);
+    setPlayerPosition({ y: newMaze.start.y, x: newMaze.start.x });
     setMoveCount(0);
     setHasWon(false);
     setShowWinModal(false);
-  }, []);
+  }, [level]);
+
+  const playDifferentLevel = useCallback((newLevel: number) => {
+    navigation.replace("Game", { level: newLevel, carIcon });
+  }, [navigation, carIcon]);
+
+  const goToMenu = useCallback(() => {
+    navigation.navigate("Menu");
+  }, [navigation]);
 
   const getStarRating = () => {
-    if (moveCount <= 8) return 3;
-    if (moveCount <= 12) return 2;
+    const baseMoves = 6 + level * 2;
+    if (moveCount <= baseMoves) return 3;
+    if (moveCount <= baseMoves + 4) return 2;
     return 1;
   };
 
+  const getLevelName = (lvl: number) => {
+    switch (lvl) {
+      case 1: return "Easy";
+      case 2: return "Normal";
+      case 3: return "Medium";
+      case 4: return "Hard";
+      case 5: return "Expert";
+      default: return `Level ${lvl}`;
+    }
+  };
+
   const renderCell = (rowIndex: number, colIndex: number) => {
-    const cell = LEVEL_1_DATA.grid[rowIndex][colIndex];
+    const cell = currentMaze.grid[rowIndex][colIndex];
     const isPlayer =
       playerPosition.y === rowIndex && playerPosition.x === colIndex;
     const isEnd =
-      LEVEL_1_DATA.end.y === rowIndex && LEVEL_1_DATA.end.x === colIndex;
+      currentMaze.end.y === rowIndex && currentMaze.end.x === colIndex;
     const isInPath = drawnPath.some(p => p.y === rowIndex && p.x === colIndex);
 
     return (
@@ -411,7 +379,7 @@ export default function GameScreen() {
         {isPlayer ? (
           <Animated.View style={[styles.playerContainer, animatedPlayerStyle]}>
             <View style={styles.carContainer}>
-              <Feather name="truck" size={iconSize} color={MazeColors.player} />
+              <Feather name={carIcon} size={iconSize} color={MazeColors.player} />
             </View>
           </Animated.View>
         ) : null}
@@ -437,6 +405,10 @@ export default function GameScreen() {
       <View style={styles.content}>
         <View style={styles.statsContainer}>
           <View style={styles.statBadge}>
+            <Feather name="layers" size={16} color={MazeColors.success} />
+            <ThemedText style={styles.statText}>{getLevelName(level)}</ThemedText>
+          </View>
+          <View style={[styles.statBadge, { marginLeft: Spacing.sm }]}>
             <Feather name="navigation" size={16} color={MazeColors.player} />
             <ThemedText style={styles.statText}>{moveCount} moves</ThemedText>
           </View>
@@ -449,7 +421,7 @@ export default function GameScreen() {
             onLayout={updateGridPosition}
           >
             <View style={styles.gridContainer}>
-              {LEVEL_1_DATA.grid.map((row, rowIndex) => (
+              {currentMaze.grid.map((row, rowIndex) => (
                 <View key={rowIndex} style={styles.row}>
                   {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
                 </View>
@@ -460,7 +432,7 @@ export default function GameScreen() {
 
         <ThemedText style={styles.instructionText}>Draw to drive!</ThemedText>
         <ThemedText style={styles.tipText}>
-          Draw a path from the car to move
+          Draw a path from the {carIcon === "truck" ? "truck" : "icon"} to move
         </ThemedText>
       </View>
 
@@ -472,31 +444,55 @@ export default function GameScreen() {
       >
         <View style={styles.modalOverlay}>
           <Confetti />
-          <View style={styles.modalContent}>
-            <ThemedText style={styles.winTitle}>Amazing!</ThemedText>
-            <ThemedText style={styles.winSubtitle}>You reached the goal!</ThemedText>
-            
-            <View style={styles.starsContainer}>
-              {[1, 2, 3].map((star) => (
-                <Feather
-                  key={star}
-                  name="star"
-                  size={40}
-                  color={star <= getStarRating() ? "#FFD700" : "#E0E0E0"}
-                  style={styles.star}
-                />
-              ))}
+          <ScrollView 
+            contentContainerStyle={styles.modalScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.modalContent}>
+              <ThemedText style={styles.winTitle}>Amazing!</ThemedText>
+              <ThemedText style={styles.winSubtitle}>You reached the goal!</ThemedText>
+              
+              <View style={styles.starsContainer}>
+                {[1, 2, 3].map((star) => (
+                  <Feather
+                    key={star}
+                    name="star"
+                    size={40}
+                    color={star <= getStarRating() ? "#FFD700" : "#E0E0E0"}
+                    style={styles.star}
+                  />
+                ))}
+              </View>
+
+              <ThemedText style={styles.movesSummary}>
+                Completed {getLevelName(level)} in {moveCount} moves
+              </ThemedText>
+
+              <Pressable style={styles.primaryButton} onPress={playNewMazeSameLevel}>
+                <Feather name="refresh-cw" size={20} color="#FFFFFF" />
+                <ThemedText style={styles.primaryButtonText}>New {getLevelName(level)} Maze</ThemedText>
+              </Pressable>
+
+              <ThemedText style={styles.sectionLabel}>Try Another Level</ThemedText>
+              <View style={styles.levelButtonsRow}>
+                {[1, 2, 3, 4, 5].filter(l => l !== level).map((lvl) => (
+                  <Pressable
+                    key={lvl}
+                    style={styles.levelButton}
+                    onPress={() => playDifferentLevel(lvl)}
+                  >
+                    <ThemedText style={styles.levelButtonNumber}>{lvl}</ThemedText>
+                    <ThemedText style={styles.levelButtonLabel}>{getLevelName(lvl)}</ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+
+              <Pressable style={styles.menuButton} onPress={goToMenu}>
+                <Feather name="home" size={18} color={MazeColors.textPrimary} />
+                <ThemedText style={styles.menuButtonText}>Back to Menu</ThemedText>
+              </Pressable>
             </View>
-
-            <ThemedText style={styles.movesSummary}>
-              Completed in {moveCount} moves
-            </ThemedText>
-
-            <Pressable style={styles.playAgainButton} onPress={resetGame}>
-              <Feather name="refresh-cw" size={20} color="#FFFFFF" />
-              <ThemedText style={styles.playAgainText}>Play Again</ThemedText>
-            </Pressable>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -525,7 +521,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: 20,
-    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
   },
   statText: {
     marginLeft: Spacing.xs,
@@ -582,13 +577,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  modalScrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: Spacing.xl,
+  },
   modalContent: {
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    padding: Spacing["2xl"],
+    padding: Spacing.xl,
     alignItems: "center",
-    marginHorizontal: Spacing.xl,
-    minWidth: 280,
+    marginHorizontal: Spacing.lg,
+    maxWidth: 340,
+    width: "90%",
   },
   winTitle: {
     fontSize: 32,
@@ -599,33 +601,77 @@ const styles = StyleSheet.create({
   winSubtitle: {
     fontSize: 18,
     color: MazeColors.textPrimary,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   starsContainer: {
     flexDirection: "row",
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   star: {
     marginHorizontal: 4,
   },
   movesSummary: {
-    fontSize: 16,
+    fontSize: 14,
     color: MazeColors.textSecondary,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
+    textAlign: "center",
   },
-  playAgainButton: {
+  primaryButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: MazeColors.player,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: 30,
+    width: "100%",
+    justifyContent: "center",
   },
-  playAgainText: {
+  primaryButtonText: {
     color: "#FFFFFF",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     marginLeft: Spacing.sm,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: MazeColors.textSecondary,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
+  },
+  levelButtonsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: Spacing.xs,
+  },
+  levelButton: {
+    backgroundColor: "#F0F0F0",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 12,
+    alignItems: "center",
+    minWidth: 60,
+  },
+  levelButtonNumber: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: MazeColors.textPrimary,
+  },
+  levelButtonLabel: {
+    fontSize: 10,
+    color: MazeColors.textSecondary,
+  },
+  menuButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: Spacing.lg,
+    paddingVertical: Spacing.sm,
+  },
+  menuButtonText: {
+    color: MazeColors.textPrimary,
+    fontSize: 14,
+    marginLeft: Spacing.xs,
   },
   confettiContainer: {
     position: "absolute",

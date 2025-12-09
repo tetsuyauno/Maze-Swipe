@@ -2,14 +2,20 @@ import React from "react";
 import { Pressable } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import MenuScreen from "@/screens/MenuScreen";
 import GameScreen from "@/screens/GameScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { MazeColors } from "@/constants/theme";
+import type { CarIconName } from "@/data/Mazes";
 
 export type RootStackParamList = {
-  Game: undefined;
+  Menu: undefined;
+  Game: {
+    level: number;
+    carIcon: CarIconName;
+  };
   Settings: undefined;
 };
 
@@ -20,6 +26,13 @@ export default function RootStackNavigator() {
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
+      <Stack.Screen
+        name="Menu"
+        component={MenuScreen}
+        options={{
+          headerTitle: () => <HeaderTitle title="Maze Adventure" />,
+        }}
+      />
       <Stack.Screen
         name="Game"
         component={GameScreen}
