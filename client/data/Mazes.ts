@@ -22,169 +22,132 @@ export const CAR_ICONS: { name: CarIconName; label: string }[] = [
   { name: "star", label: "Star" },
 ];
 
-// Level 1 - Easy, mostly straight paths
-export const LEVEL_1_MAZES: MazeData[] = [
-  {
-    start: { y: 0, x: 0 },
-    end: { y: 6, x: 6 },
-    grid: [
-      [{ north: true, south: false, east: false, west: true }, { north: true, south: true, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: false, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: false, south: false, east: true, west: false }],
-      [{ north: false, south: false, east: true, west: true }, { north: false, south: false, east: false, west: true }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }, { north: false, south: false, east: true, west: true }],
-      [{ north: false, south: false, east: true, west: true }, { north: false, south: false, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: false, south: false, east: true, west: false }],
-      [{ north: false, south: false, east: true, west: true }, { north: false, south: false, east: false, west: true }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }, { north: false, south: false, east: true, west: true }],
-      [{ north: false, south: false, east: true, west: true }, { north: false, south: false, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: false, south: false, east: true, west: false }],
-      [{ north: false, south: true, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-  {
-    start: { y: 0, x: 0 },
-    end: { y: 6, x: 6 },
-    grid: [
-      [{ north: true, south: false, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: true, east: true, west: false }],
-      [{ north: false, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: false, south: false, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: false, south: false, east: true, west: false }],
-      [{ north: false, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }, { north: false, south: false, east: true, west: true }],
-      [{ north: false, south: false, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: false, south: false, east: true, west: false }],
-      [{ north: false, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }, { north: false, south: false, east: true, west: true }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: true, east: false, west: true }, { north: true, south: true, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-];
+const GRID_SIZE = 7;
 
-// Level 2 - Moderate with a few turns
-export const LEVEL_2_MAZES: MazeData[] = [
-  {
-    start: { y: 0, x: 0 },
-    end: { y: 6, x: 6 },
-    grid: [
-      [{ north: true, south: false, east: false, west: true }, { north: true, south: true, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: false, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: false, south: false, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: false, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: false, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: true, south: true, east: false, west: false }, { north: false, south: false, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: false, south: false, east: true, west: true }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-  {
-    start: { y: 3, x: 0 },
-    end: { y: 3, x: 6 },
-    grid: [
-      [{ north: true, south: false, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: true, east: false, west: false }, { north: true, south: false, east: false, west: false }, { north: true, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: true, west: true }, { north: false, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: false, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: false, east: true, west: false }, { north: false, south: true, east: true, west: true }],
-      [{ north: false, south: false, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: false, south: true, east: true, west: false }, { north: false, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: false, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: true, east: true, west: true }, { north: false, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-      [{ north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: false, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: false, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: true, east: false, west: false }, { north: false, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-];
+type Direction = 'north' | 'south' | 'east' | 'west';
 
-// Level 3 - Medium complexity with more dead ends
-export const LEVEL_3_MAZES: MazeData[] = [
-  {
-    start: { y: 0, x: 0 },
-    end: { y: 6, x: 6 },
-    grid: [
-      [{ north: true, south: false, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: true, south: true, east: false, west: false }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: false, west: false }, { north: true, south: true, east: true, west: false }],
-      [{ north: false, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-      [{ north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-      [{ north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-  {
-    start: { y: 6, x: 0 },
-    end: { y: 0, x: 6 },
-    grid: [
-      [{ north: true, south: false, east: true, west: true }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: true, west: true }],
-      [{ north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: true, west: true }],
-    ],
-  },
-];
-
-// Level 4 - Hard with complex paths
-export const LEVEL_4_MAZES: MazeData[] = [
-  {
-    start: { y: 0, x: 0 },
-    end: { y: 6, x: 6 },
-    grid: [
-      [{ north: true, south: false, east: false, west: true }, { north: true, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: true, west: true }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: true, west: true }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: true, west: true }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: false, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: true, south: true, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-  {
-    start: { y: 3, x: 3 },
-    end: { y: 6, x: 6 },
-    grid: [
-      [{ north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: false, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }],
-      [{ north: false, south: true, east: true, west: true }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-];
-
-// Level 5 - Expert with many dead ends and complex solutions
-export const LEVEL_5_MAZES: MazeData[] = [
-  {
-    start: { y: 0, x: 0 },
-    end: { y: 6, x: 6 },
-    grid: [
-      [{ north: true, south: false, east: true, west: true }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: true, south: true, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-  {
-    start: { y: 6, x: 6 },
-    end: { y: 0, x: 0 },
-    grid: [
-      [{ north: true, south: false, east: true, west: true }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: true, east: false, west: true }, { north: true, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: true, south: false, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-      [{ north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: false, east: true, west: false }, { north: true, south: false, east: true, west: true }],
-      [{ north: true, south: true, east: true, west: true }, { north: false, south: true, east: false, west: true }, { north: true, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: true, south: true, east: true, west: false }, { north: false, south: true, east: false, west: true }, { north: false, south: true, east: true, west: false }],
-    ],
-  },
-];
-
-export const ALL_MAZES = {
-  1: LEVEL_1_MAZES,
-  2: LEVEL_2_MAZES,
-  3: LEVEL_3_MAZES,
-  4: LEVEL_4_MAZES,
-  5: LEVEL_5_MAZES,
-};
-
-export function getRandomMaze(level: number): MazeData {
-  const mazes = ALL_MAZES[level as keyof typeof ALL_MAZES] || LEVEL_1_MAZES;
-  const randomIndex = Math.floor(Math.random() * mazes.length);
-  return mazes[randomIndex];
+interface Cell {
+  y: number;
+  x: number;
 }
 
-// Keep LEVEL_1_DATA for backwards compatibility
-export const LEVEL_1_DATA = LEVEL_1_MAZES[0];
+const DIRECTIONS: { dir: Direction; dy: number; dx: number; opposite: Direction }[] = [
+  { dir: 'north', dy: -1, dx: 0, opposite: 'south' },
+  { dir: 'south', dy: 1, dx: 0, opposite: 'north' },
+  { dir: 'east', dy: 0, dx: 1, opposite: 'west' },
+  { dir: 'west', dy: 0, dx: -1, opposite: 'east' },
+];
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function createEmptyGrid(): CellWalls[][] {
+  const grid: CellWalls[][] = [];
+  for (let y = 0; y < GRID_SIZE; y++) {
+    const row: CellWalls[] = [];
+    for (let x = 0; x < GRID_SIZE; x++) {
+      row.push({ north: true, south: true, east: true, west: true });
+    }
+    grid.push(row);
+  }
+  return grid;
+}
+
+function isValidCell(y: number, x: number): boolean {
+  return y >= 0 && y < GRID_SIZE && x >= 0 && x < GRID_SIZE;
+}
+
+function generateMazeFromCell(startY: number, startX: number): CellWalls[][] {
+  const grid = createEmptyGrid();
+  const visited: boolean[][] = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(false));
+  const stack: Cell[] = [];
+  
+  stack.push({ y: startY, x: startX });
+  visited[startY][startX] = true;
+  
+  while (stack.length > 0) {
+    const current = stack[stack.length - 1];
+    const { y, x } = current;
+    
+    const shuffledDirections = shuffleArray(DIRECTIONS);
+    let foundUnvisited = false;
+    
+    for (const { dir, dy, dx, opposite } of shuffledDirections) {
+      const newY = y + dy;
+      const newX = x + dx;
+      
+      if (isValidCell(newY, newX) && !visited[newY][newX]) {
+        grid[y][x][dir] = false;
+        grid[newY][newX][opposite] = false;
+        
+        visited[newY][newX] = true;
+        stack.push({ y: newY, x: newX });
+        foundUnvisited = true;
+        break;
+      }
+    }
+    
+    if (!foundUnvisited) {
+      stack.pop();
+    }
+  }
+  
+  return grid;
+}
+
+function getStartEndPositions(level: number): { start: Cell; end: Cell } {
+  const positionSets: { start: Cell; end: Cell }[][] = [
+    [{ start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } }],
+    
+    [
+      { start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } },
+      { start: { y: GRID_SIZE - 1, x: 0 }, end: { y: 0, x: GRID_SIZE - 1 } },
+    ],
+    
+    [
+      { start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } },
+      { start: { y: GRID_SIZE - 1, x: 0 }, end: { y: 0, x: GRID_SIZE - 1 } },
+      { start: { y: 0, x: GRID_SIZE - 1 }, end: { y: GRID_SIZE - 1, x: 0 } },
+    ],
+    
+    [
+      { start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } },
+      { start: { y: GRID_SIZE - 1, x: 0 }, end: { y: 0, x: GRID_SIZE - 1 } },
+      { start: { y: 0, x: GRID_SIZE - 1 }, end: { y: GRID_SIZE - 1, x: 0 } },
+      { start: { y: Math.floor(GRID_SIZE / 2), x: 0 }, end: { y: Math.floor(GRID_SIZE / 2), x: GRID_SIZE - 1 } },
+    ],
+    
+    [
+      { start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } },
+      { start: { y: GRID_SIZE - 1, x: 0 }, end: { y: 0, x: GRID_SIZE - 1 } },
+      { start: { y: 0, x: GRID_SIZE - 1 }, end: { y: GRID_SIZE - 1, x: 0 } },
+      { start: { y: Math.floor(GRID_SIZE / 2), x: 0 }, end: { y: Math.floor(GRID_SIZE / 2), x: GRID_SIZE - 1 } },
+      { start: { y: 0, x: Math.floor(GRID_SIZE / 2) }, end: { y: GRID_SIZE - 1, x: Math.floor(GRID_SIZE / 2) } },
+    ],
+  ];
+  
+  const levelIndex = Math.max(0, Math.min(4, level - 1));
+  const positions = positionSets[levelIndex];
+  return positions[Math.floor(Math.random() * positions.length)];
+}
+
+export function generateMaze(level: number): MazeData {
+  const { start, end } = getStartEndPositions(level);
+  
+  const grid = generateMazeFromCell(start.y, start.x);
+  
+  return { grid, start, end };
+}
+
+export function getRandomMaze(level: number): MazeData {
+  const clampedLevel = Math.max(1, Math.min(5, level));
+  return generateMaze(clampedLevel);
+}
+
+export const LEVEL_1_DATA: MazeData = generateMaze(1);
