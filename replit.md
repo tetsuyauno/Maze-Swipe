@@ -48,6 +48,10 @@ Preferred communication style: Simple, everyday language.
 - **Safe Area**: Consistent use of `react-native-safe-area-context` for device insets
 
 ### Game Mechanics
+- **Maze Generation**: Recursive Backtracker (DFS) algorithm generates guaranteed-solvable 7x7 mazes
+  - Starts from the start position, ensuring all cells are connected
+  - New random maze generated for each game or replay
+  - Difficulty levels vary start/end positions for variety
 - Maze data stored as grid of cells with wall definitions (north, south, east, west booleans)
 - Player movement via tap-to-move: tap any cell and the car moves there if a valid path exists
 - BFS pathfinding algorithm finds the shortest path to the target cell
@@ -55,6 +59,12 @@ Preferred communication style: Simple, everyday language.
 - Wall collision detection based on cell wall properties
 - Haptic feedback on movement and blocked moves
 - Confetti animation and star rating (1-3 stars based on moves) when reaching goal
+
+### Difficulty Levels
+- Level 1 (Easy): Start at top-left (0,0), goal at bottom-right (6,6)
+- Level 2 (Normal): Adds corner-to-corner variation
+- Levels 3-5: More start/end position variations including edge positions
+- All mazes use same generation algorithm - complexity comes from random maze structure and varied positions
 
 ## External Dependencies
 
