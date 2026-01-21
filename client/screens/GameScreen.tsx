@@ -9,7 +9,6 @@ import {
   ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -29,10 +28,9 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, MazeColors } from "@/constants/theme";
-import { CellWalls, getRandomMaze, MazeData, CarIconName } from "@/data/Mazes";
+import { CellWalls, getRandomMaze, MazeData, CarIconName, MAZE_SIZES } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
-const GRID_SIZE = 7;
 const WALL_THICKNESS = 4;
 
 type Position = { y: number; x: number };
@@ -113,9 +111,9 @@ export default function GameScreen() {
   const route = useRoute<GameRouteProp>();
   const navigation = useNavigation<GameNavProp>();
   const insets = useSafeAreaInsets();
-  const headerHeight = useHeaderHeight();
 
   const { level, carIcon } = route.params;
+  const sizeConfig = MAZE_SIZES[level];
 
   const [currentMaze, setCurrentMaze] = useState<MazeData>(() => getRandomMaze(level));
   const [playerPosition, setPlayerPosition] = useState<Position>({
@@ -137,8 +135,14 @@ export default function GameScreen() {
   const isDrawingRef = useRef(false);
 
   const screenWidth = Dimensions.get("window").width;
-  const gridPadding = Spacing.md * 2;
-  const cellSize = Math.floor((screenWidth - gridPadding) / GRID_SIZE);
+  const screenHeight = Dimensions.get("window").height;
+  
+  const availableHeight = screenHeight - insets.top - insets.bottom - 120;
+  const availableWidth = screenWidth - insets.left - insets.right - 200;
+  
+  const cellSizeByHeight = Math.floor(availableHeight / currentMaze.rows);
+  const cellSizeByWidth = Math.floor(availableWidth / currentMaze.cols);
+  const cellSize = Math.min(cellSizeByHeight, cellSizeByWidth, 70);
   const iconSize = Math.floor(cellSize * 0.55);
 
   const shakeX = useSharedValue(0);
@@ -196,6 +200,11 @@ export default function GameScreen() {
   const cellSizeRef = useRef(cellSize);
   cellSizeRef.current = cellSize;
 
+  const mazeRowsRef = useRef(currentMaze.rows);
+  const mazeColsRef = useRef(currentMaze.cols);
+  mazeRowsRef.current = currentMaze.rows;
+  mazeColsRef.current = currentMaze.cols;
+
   const updateGridPosition = useCallback(() => {
     if (gridViewRef.current && typeof (gridViewRef.current as any).measureInWindow === 'function') {
       (gridViewRef.current as any).measureInWindow((x: number, y: number) => {
@@ -215,7 +224,7 @@ export default function GameScreen() {
     const col = Math.floor(relativeX / size);
     const row = Math.floor(relativeY / size);
     
-    if (col < 0 || col >= GRID_SIZE || row < 0 || row >= GRID_SIZE) {
+    if (col < 0 || col >= mazeColsRef.current || row < 0 || row >= mazeRowsRef.current) {
       return null;
     }
     
@@ -327,21 +336,10 @@ export default function GameScreen() {
   }, [navigation]);
 
   const getStarRating = () => {
-    const baseMoves = 6 + level * 2;
+    const baseMoves = currentMaze.rows + currentMaze.cols;
     if (moveCount <= baseMoves) return 3;
     if (moveCount <= baseMoves + 4) return 2;
     return 1;
-  };
-
-  const getLevelName = (lvl: number) => {
-    switch (lvl) {
-      case 1: return "Easy";
-      case 2: return "Normal";
-      case 3: return "Medium";
-      case 4: return "Hard";
-      case 5: return "Expert";
-      default: return `Level ${lvl}`;
-    }
   };
 
   const renderCell = (rowIndex: number, colIndex: number) => {
@@ -397,21 +395,30 @@ export default function GameScreen() {
       style={[
         styles.container,
         {
-          paddingTop: headerHeight + Spacing.sm,
+          paddingTop: insets.top + Spacing.sm,
           paddingBottom: insets.bottom + Spacing.sm,
+          paddingLeft: insets.left + Spacing.sm,
+          paddingRight: insets.right + Spacing.sm,
         },
       ]}
     >
       <View style={styles.content}>
-        <View style={styles.statsContainer}>
-          <View style={styles.statBadge}>
-            <Feather name="layers" size={16} color={MazeColors.success} />
-            <ThemedText style={styles.statText}>{getLevelName(level)}</ThemedText>
+        <View style={styles.sidebar}>
+          <View style={styles.statsContainer}>
+            <View style={styles.statBadge}>
+              <Feather name={sizeConfig.icon} size={16} color={MazeColors.success} />
+              <ThemedText style={styles.statText}>{sizeConfig.label}</ThemedText>
+            </View>
+            <View style={styles.statBadge}>
+              <Feather name="navigation" size={16} color={MazeColors.player} />
+              <ThemedText style={styles.statText}>{moveCount} moves</ThemedText>
+            </View>
           </View>
-          <View style={[styles.statBadge, { marginLeft: Spacing.sm }]}>
-            <Feather name="navigation" size={16} color={MazeColors.player} />
-            <ThemedText style={styles.statText}>{moveCount} moves</ThemedText>
-          </View>
+          
+          <ThemedText style={styles.instructionText}>Draw to drive!</ThemedText>
+          <ThemedText style={styles.tipText}>
+            Draw a path from the {carIcon === "truck" ? "truck" : "icon"} to move
+          </ThemedText>
         </View>
 
         <GestureDetector gesture={panGesture}>
@@ -429,11 +436,6 @@ export default function GameScreen() {
             </View>
           </View>
         </GestureDetector>
-
-        <ThemedText style={styles.instructionText}>Draw to drive!</ThemedText>
-        <ThemedText style={styles.tipText}>
-          Draw a path from the {carIcon === "truck" ? "truck" : "icon"} to move
-        </ThemedText>
       </View>
 
       <Modal
@@ -457,7 +459,7 @@ export default function GameScreen() {
                   <Feather
                     key={star}
                     name="star"
-                    size={40}
+                    size={36}
                     color={star <= getStarRating() ? "#FFD700" : "#E0E0E0"}
                     style={styles.star}
                   />
@@ -465,15 +467,15 @@ export default function GameScreen() {
               </View>
 
               <ThemedText style={styles.movesSummary}>
-                Completed {getLevelName(level)} in {moveCount} moves
+                Completed {sizeConfig.label} maze in {moveCount} moves
               </ThemedText>
 
               <Pressable style={styles.primaryButton} onPress={playNewMazeSameLevel}>
-                <Feather name="refresh-cw" size={20} color="#FFFFFF" />
-                <ThemedText style={styles.primaryButtonText}>New {getLevelName(level)} Maze</ThemedText>
+                <Feather name="refresh-cw" size={18} color="#FFFFFF" />
+                <ThemedText style={styles.primaryButtonText}>New {sizeConfig.label} Maze</ThemedText>
               </Pressable>
 
-              <ThemedText style={styles.sectionLabel}>Try Another Level</ThemedText>
+              <ThemedText style={styles.sectionLabel}>Try Another Size</ThemedText>
               <View style={styles.levelButtonsRow}>
                 {[1, 2, 3, 4, 5].filter(l => l !== level).map((lvl) => (
                   <Pressable
@@ -481,14 +483,14 @@ export default function GameScreen() {
                     style={styles.levelButton}
                     onPress={() => playDifferentLevel(lvl)}
                   >
-                    <ThemedText style={styles.levelButtonNumber}>{lvl}</ThemedText>
-                    <ThemedText style={styles.levelButtonLabel}>{getLevelName(lvl)}</ThemedText>
+                    <Feather name={MAZE_SIZES[lvl].icon} size={16} color={MazeColors.player} />
+                    <ThemedText style={styles.levelButtonLabel}>{MAZE_SIZES[lvl].label}</ThemedText>
                   </Pressable>
                 ))}
               </View>
 
               <Pressable style={styles.menuButton} onPress={goToMenu}>
-                <Feather name="home" size={18} color={MazeColors.textPrimary} />
+                <Feather name="home" size={16} color={MazeColors.textPrimary} />
                 <ThemedText style={styles.menuButtonText}>Back to Menu</ThemedText>
               </Pressable>
             </View>
@@ -506,12 +508,18 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: Spacing.sm,
+  },
+  sidebar: {
+    marginRight: Spacing.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    maxWidth: 150,
   },
   statsContainer: {
-    flexDirection: "row",
+    gap: Spacing.sm,
     marginBottom: Spacing.md,
   },
   statBadge: {
@@ -524,7 +532,7 @@ const styles = StyleSheet.create({
   },
   statText: {
     marginLeft: Spacing.xs,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: MazeColors.textPrimary,
   },
@@ -561,15 +569,16 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   instructionText: {
-    marginTop: Spacing.md,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: MazeColors.textPrimary,
+    textAlign: "center",
   },
   tipText: {
     marginTop: Spacing.xs,
-    fontSize: 14,
+    fontSize: 12,
     color: MazeColors.textSecondary,
+    textAlign: "center",
   },
   modalOverlay: {
     flex: 1,
@@ -581,25 +590,25 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: Spacing.xl,
+    paddingVertical: Spacing.lg,
   },
   modalContent: {
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    padding: Spacing.xl,
+    padding: Spacing.lg,
     alignItems: "center",
     marginHorizontal: Spacing.lg,
-    maxWidth: 340,
+    maxWidth: 380,
     width: "90%",
   },
   winTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "bold",
     color: MazeColors.success,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   winSubtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: MazeColors.textPrimary,
     marginBottom: Spacing.md,
   },
@@ -611,16 +620,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   movesSummary: {
-    fontSize: 14,
+    fontSize: 13,
     color: MazeColors.textSecondary,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
     textAlign: "center",
   },
   primaryButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: MazeColors.player,
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderRadius: 30,
     width: "100%",
@@ -628,15 +637,15 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     marginLeft: Spacing.sm,
   },
   sectionLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     color: MazeColors.textSecondary,
-    marginTop: Spacing.lg,
+    marginTop: Spacing.md,
     marginBottom: Spacing.sm,
   },
   levelButtonsRow: {
@@ -651,26 +660,22 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: 12,
     alignItems: "center",
-    minWidth: 60,
-  },
-  levelButtonNumber: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: MazeColors.textPrimary,
+    minWidth: 70,
   },
   levelButtonLabel: {
-    fontSize: 10,
+    fontSize: 11,
     color: MazeColors.textSecondary,
+    marginTop: 2,
   },
   menuButton: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: Spacing.lg,
+    marginTop: Spacing.md,
     paddingVertical: Spacing.sm,
   },
   menuButtonText: {
     color: MazeColors.textPrimary,
-    fontSize: 14,
+    fontSize: 13,
     marginLeft: Spacing.xs,
   },
   confettiContainer: {
