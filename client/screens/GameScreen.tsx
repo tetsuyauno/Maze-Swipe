@@ -18,7 +18,6 @@ import Animated, {
   withTiming,
   withSpring,
   withRepeat,
-  withDelay,
   Easing,
   runOnJS,
 } from "react-native-reanimated";
@@ -140,8 +139,8 @@ export default function GameScreen() {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
   
-  const availableHeight = screenHeight - insets.top - insets.bottom - 120;
-  const availableWidth = screenWidth - insets.left - insets.right - 200;
+  const availableHeight = screenHeight - insets.top - insets.bottom - 20;
+  const availableWidth = screenWidth - insets.left - insets.right - 20;
   
   const cellSizeByHeight = Math.floor(availableHeight / currentMaze.rows);
   const cellSizeByWidth = Math.floor(availableWidth / currentMaze.cols);
@@ -151,7 +150,6 @@ export default function GameScreen() {
   const playerX = useSharedValue(currentMaze.start.x * cellSize);
   const playerY = useSharedValue(currentMaze.start.y * cellSize);
   const playerScale = useSharedValue(1);
-  const playerRotation = useSharedValue(0);
   const goalPulse = useSharedValue(1);
 
   const cellSizeRef = useRef(cellSize);
@@ -187,7 +185,6 @@ export default function GameScreen() {
       { translateX: playerX.value },
       { translateY: playerY.value },
       { scale: playerScale.value },
-      { rotate: `${playerRotation.value}deg` },
     ],
   }));
 
@@ -215,15 +212,6 @@ export default function GameScreen() {
       
       currentIndex++;
       const nextPos = path[currentIndex];
-      const prevPos = path[currentIndex - 1];
-      
-      let targetRotation = 0;
-      if (nextPos.x > prevPos.x) targetRotation = 90;
-      else if (nextPos.x < prevPos.x) targetRotation = -90;
-      else if (nextPos.y > prevPos.y) targetRotation = 180;
-      else if (nextPos.y < prevPos.y) targetRotation = 0;
-      
-      playerRotation.value = withTiming(targetRotation, { duration: 50 });
       
       playerScale.value = withSequence(
         withTiming(1.15, { duration: MOVE_DURATION / 3 }),
@@ -247,7 +235,7 @@ export default function GameScreen() {
     };
     
     moveToNext();
-  }, [playerX, playerY, playerScale, playerRotation]);
+  }, [playerX, playerY, playerScale]);
 
   const gridLayoutRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const gridViewRef = useRef<View>(null);
@@ -382,12 +370,11 @@ export default function GameScreen() {
     setPlayerPosition({ y: newMaze.start.y, x: newMaze.start.x });
     playerX.value = newMaze.start.x * cellSizeRef.current;
     playerY.value = newMaze.start.y * cellSizeRef.current;
-    playerRotation.value = 0;
     setMoveCount(0);
     setHasWon(false);
     setShowWinModal(false);
     setIsAnimating(false);
-  }, [level, playerX, playerY, playerRotation]);
+  }, [level, playerX, playerY]);
 
   const playDifferentLevel = useCallback((newLevel: number) => {
     navigation.replace("Game", { level: newLevel, carIcon });
@@ -456,24 +443,6 @@ export default function GameScreen() {
       ]}
     >
       <View style={styles.content}>
-        <View style={styles.sidebar}>
-          <View style={styles.statsContainer}>
-            <View style={styles.statBadge}>
-              <Feather name={sizeConfig.icon} size={16} color={MazeColors.success} />
-              <ThemedText style={styles.statText}>{sizeConfig.label}</ThemedText>
-            </View>
-            <View style={styles.statBadge}>
-              <Feather name="navigation" size={16} color={MazeColors.player} />
-              <ThemedText style={styles.statText}>{moveCount} moves</ThemedText>
-            </View>
-          </View>
-          
-          <ThemedText style={styles.instructionText}>Draw to drive!</ThemedText>
-          <ThemedText style={styles.tipText}>
-            Draw a path from the {carIcon === "truck" ? "truck" : "icon"} to move
-          </ThemedText>
-        </View>
-
         <GestureDetector gesture={panGesture}>
           <View 
             ref={gridViewRef}
@@ -580,30 +549,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  sidebar: {
-    marginRight: Spacing.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    maxWidth: 150,
-  },
-  statsContainer: {
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  statBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: 20,
-  },
-  statText: {
-    marginLeft: Spacing.xs,
-    fontSize: 14,
-    fontWeight: "600",
-    color: MazeColors.textPrimary,
-  },
   gridWrapper: {
     borderRadius: 16,
     overflow: "hidden",
@@ -640,18 +585,6 @@ const styles = StyleSheet.create({
   pathDot: {
     backgroundColor: "rgba(255, 140, 0, 0.8)",
     borderRadius: 100,
-  },
-  instructionText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: MazeColors.textPrimary,
-    textAlign: "center",
-  },
-  tipText: {
-    marginTop: Spacing.xs,
-    fontSize: 12,
-    color: MazeColors.textSecondary,
-    textAlign: "center",
   },
   modalOverlay: {
     flex: 1,
