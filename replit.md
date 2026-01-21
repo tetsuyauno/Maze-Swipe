@@ -60,11 +60,15 @@ Preferred communication style: Simple, everyday language.
 - Haptic feedback on movement and blocked moves
 - Confetti animation and star rating (1-3 stars based on moves) when reaching goal
 
-### Difficulty Levels
-- Level 1 (Easy): Start at top-left (0,0), goal at bottom-right (6,6)
-- Level 2 (Normal): Adds corner-to-corner variation
-- Levels 3-5: More start/end position variations including edge positions
-- All mazes use same generation algorithm - complexity comes from random maze structure and varied positions
+### Maze Sizes (Landscape Mode)
+The app runs in landscape orientation for a bigger maze experience:
+- Level 1: 5 x 3 (5 columns, 3 rows) - smallest, easiest
+- Level 2: 6 x 4
+- Level 3: 7 x 5
+- Level 4: 8 x 5
+- Level 5: 9 x 6 (9 columns, 6 rows) - largest, most challenging
+- Menu displays maze sizes with icons instead of difficulty labels
+- All mazes use same generation algorithm - complexity comes from size and random maze structure
 
 ## External Dependencies
 
