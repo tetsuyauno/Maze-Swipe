@@ -9,6 +9,8 @@ export interface MazeData {
   grid: CellWalls[][];
   start: { y: number; x: number };
   end: { y: number; x: number };
+  rows: number;
+  cols: number;
 }
 
 export type CarIconName = "truck" | "navigation" | "compass" | "send" | "zap" | "star";
@@ -22,7 +24,20 @@ export const CAR_ICONS: { name: CarIconName; label: string }[] = [
   { name: "star", label: "Star" },
 ];
 
-const GRID_SIZE = 7;
+export interface MazeSizeConfig {
+  rows: number;
+  cols: number;
+  label: string;
+  icon: "grid" | "square" | "maximize" | "layout" | "box";
+}
+
+export const MAZE_SIZES: Record<number, MazeSizeConfig> = {
+  1: { rows: 3, cols: 5, label: "5 x 3", icon: "grid" },
+  2: { rows: 4, cols: 6, label: "6 x 4", icon: "square" },
+  3: { rows: 5, cols: 7, label: "7 x 5", icon: "maximize" },
+  4: { rows: 5, cols: 8, label: "8 x 5", icon: "layout" },
+  5: { rows: 6, cols: 9, label: "9 x 6", icon: "box" },
+};
 
 type Direction = 'north' | 'south' | 'east' | 'west';
 
@@ -47,11 +62,11 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-function createEmptyGrid(): CellWalls[][] {
+function createEmptyGrid(rows: number, cols: number): CellWalls[][] {
   const grid: CellWalls[][] = [];
-  for (let y = 0; y < GRID_SIZE; y++) {
+  for (let y = 0; y < rows; y++) {
     const row: CellWalls[] = [];
-    for (let x = 0; x < GRID_SIZE; x++) {
+    for (let x = 0; x < cols; x++) {
       row.push({ north: true, south: true, east: true, west: true });
     }
     grid.push(row);
@@ -59,13 +74,13 @@ function createEmptyGrid(): CellWalls[][] {
   return grid;
 }
 
-function isValidCell(y: number, x: number): boolean {
-  return y >= 0 && y < GRID_SIZE && x >= 0 && x < GRID_SIZE;
+function isValidCell(y: number, x: number, rows: number, cols: number): boolean {
+  return y >= 0 && y < rows && x >= 0 && x < cols;
 }
 
-function generateMazeFromCell(startY: number, startX: number): CellWalls[][] {
-  const grid = createEmptyGrid();
-  const visited: boolean[][] = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(false));
+function generateMazeFromCell(startY: number, startX: number, rows: number, cols: number): CellWalls[][] {
+  const grid = createEmptyGrid(rows, cols);
+  const visited: boolean[][] = Array(rows).fill(null).map(() => Array(cols).fill(false));
   const stack: Cell[] = [];
   
   stack.push({ y: startY, x: startX });
@@ -82,7 +97,7 @@ function generateMazeFromCell(startY: number, startX: number): CellWalls[][] {
       const newY = y + dy;
       const newX = x + dx;
       
-      if (isValidCell(newY, newX) && !visited[newY][newX]) {
+      if (isValidCell(newY, newX, rows, cols) && !visited[newY][newX]) {
         grid[y][x][dir] = false;
         grid[newY][newX][opposite] = false;
         
@@ -101,34 +116,34 @@ function generateMazeFromCell(startY: number, startX: number): CellWalls[][] {
   return grid;
 }
 
-function getStartEndPositions(level: number): { start: Cell; end: Cell } {
+function getStartEndPositions(level: number, rows: number, cols: number): { start: Cell; end: Cell } {
   const positionSets: { start: Cell; end: Cell }[][] = [
-    [{ start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } }],
+    [{ start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } }],
     
     [
-      { start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } },
-      { start: { y: GRID_SIZE - 1, x: 0 }, end: { y: 0, x: GRID_SIZE - 1 } },
+      { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
+      { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
     ],
     
     [
-      { start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } },
-      { start: { y: GRID_SIZE - 1, x: 0 }, end: { y: 0, x: GRID_SIZE - 1 } },
-      { start: { y: 0, x: GRID_SIZE - 1 }, end: { y: GRID_SIZE - 1, x: 0 } },
+      { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
+      { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
+      { start: { y: 0, x: cols - 1 }, end: { y: rows - 1, x: 0 } },
     ],
     
     [
-      { start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } },
-      { start: { y: GRID_SIZE - 1, x: 0 }, end: { y: 0, x: GRID_SIZE - 1 } },
-      { start: { y: 0, x: GRID_SIZE - 1 }, end: { y: GRID_SIZE - 1, x: 0 } },
-      { start: { y: Math.floor(GRID_SIZE / 2), x: 0 }, end: { y: Math.floor(GRID_SIZE / 2), x: GRID_SIZE - 1 } },
+      { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
+      { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
+      { start: { y: 0, x: cols - 1 }, end: { y: rows - 1, x: 0 } },
+      { start: { y: Math.floor(rows / 2), x: 0 }, end: { y: Math.floor(rows / 2), x: cols - 1 } },
     ],
     
     [
-      { start: { y: 0, x: 0 }, end: { y: GRID_SIZE - 1, x: GRID_SIZE - 1 } },
-      { start: { y: GRID_SIZE - 1, x: 0 }, end: { y: 0, x: GRID_SIZE - 1 } },
-      { start: { y: 0, x: GRID_SIZE - 1 }, end: { y: GRID_SIZE - 1, x: 0 } },
-      { start: { y: Math.floor(GRID_SIZE / 2), x: 0 }, end: { y: Math.floor(GRID_SIZE / 2), x: GRID_SIZE - 1 } },
-      { start: { y: 0, x: Math.floor(GRID_SIZE / 2) }, end: { y: GRID_SIZE - 1, x: Math.floor(GRID_SIZE / 2) } },
+      { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
+      { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
+      { start: { y: 0, x: cols - 1 }, end: { y: rows - 1, x: 0 } },
+      { start: { y: Math.floor(rows / 2), x: 0 }, end: { y: Math.floor(rows / 2), x: cols - 1 } },
+      { start: { y: 0, x: Math.floor(cols / 2) }, end: { y: rows - 1, x: Math.floor(cols / 2) } },
     ],
   ];
   
@@ -138,16 +153,18 @@ function getStartEndPositions(level: number): { start: Cell; end: Cell } {
 }
 
 export function generateMaze(level: number): MazeData {
-  const { start, end } = getStartEndPositions(level);
+  const clampedLevel = Math.max(1, Math.min(5, level));
+  const sizeConfig = MAZE_SIZES[clampedLevel];
+  const { rows, cols } = sizeConfig;
   
-  const grid = generateMazeFromCell(start.y, start.x);
+  const { start, end } = getStartEndPositions(level, rows, cols);
+  const grid = generateMazeFromCell(start.y, start.x, rows, cols);
   
-  return { grid, start, end };
+  return { grid, start, end, rows, cols };
 }
 
 export function getRandomMaze(level: number): MazeData {
-  const clampedLevel = Math.max(1, Math.min(5, level));
-  return generateMaze(clampedLevel);
+  return generateMaze(level);
 }
 
 export const LEVEL_1_DATA: MazeData = generateMaze(1);
