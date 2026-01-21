@@ -18,6 +18,7 @@ import Animated, {
   withTiming,
   withSpring,
   withRepeat,
+  withDelay,
   Easing,
   runOnJS,
 } from "react-native-reanimated";
@@ -32,6 +33,7 @@ import { CellWalls, getRandomMaze, MazeData, CarIconName, MAZE_SIZES } from "@/d
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const WALL_THICKNESS = 4;
+const MOVE_DURATION = 150;
 
 type Position = { y: number; x: number };
 type GameRouteProp = RouteProp<RootStackParamList, "Game">;
@@ -124,6 +126,7 @@ export default function GameScreen() {
   const [showWinModal, setShowWinModal] = useState(false);
   const [hasWon, setHasWon] = useState(false);
   const [drawnPath, setDrawnPath] = useState<Position[]>([]);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const currentMazeRef = useRef(currentMaze);
   currentMazeRef.current = currentMaze;
@@ -145,9 +148,14 @@ export default function GameScreen() {
   const cellSize = Math.min(cellSizeByHeight, cellSizeByWidth, 70);
   const iconSize = Math.floor(cellSize * 0.55);
 
-  const shakeX = useSharedValue(0);
+  const playerX = useSharedValue(currentMaze.start.x * cellSize);
+  const playerY = useSharedValue(currentMaze.start.y * cellSize);
   const playerScale = useSharedValue(1);
+  const playerRotation = useSharedValue(0);
   const goalPulse = useSharedValue(1);
+
+  const cellSizeRef = useRef(cellSize);
+  cellSizeRef.current = cellSize;
 
   useEffect(() => {
     goalPulse.value = withRepeat(
@@ -176,8 +184,10 @@ export default function GameScreen() {
 
   const animatedPlayerStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: shakeX.value },
+      { translateX: playerX.value },
+      { translateY: playerY.value },
       { scale: playerScale.value },
+      { rotate: `${playerRotation.value}deg` },
     ],
   }));
 
@@ -185,20 +195,62 @@ export default function GameScreen() {
     transform: [{ scale: goalPulse.value }],
   }));
 
-  const triggerMoveAnimation = useCallback(() => {
-    playerScale.value = withSequence(
-      withSpring(1.3, { damping: 5 }),
-      withSpring(1, { damping: 8 })
-    );
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const animateAlongPath = useCallback((path: Position[], onComplete: () => void) => {
+    if (path.length <= 1) {
+      onComplete();
+      return;
     }
-  }, [playerScale]);
+
+    setIsAnimating(true);
+    const size = cellSizeRef.current;
+    
+    let currentIndex = 0;
+    
+    const moveToNext = () => {
+      if (currentIndex >= path.length - 1) {
+        setIsAnimating(false);
+        onComplete();
+        return;
+      }
+      
+      currentIndex++;
+      const nextPos = path[currentIndex];
+      const prevPos = path[currentIndex - 1];
+      
+      let targetRotation = 0;
+      if (nextPos.x > prevPos.x) targetRotation = 90;
+      else if (nextPos.x < prevPos.x) targetRotation = -90;
+      else if (nextPos.y > prevPos.y) targetRotation = 180;
+      else if (nextPos.y < prevPos.y) targetRotation = 0;
+      
+      playerRotation.value = withTiming(targetRotation, { duration: 50 });
+      
+      playerScale.value = withSequence(
+        withTiming(1.15, { duration: MOVE_DURATION / 3 }),
+        withTiming(1, { duration: MOVE_DURATION / 3 })
+      );
+      
+      playerX.value = withTiming(nextPos.x * size, { 
+        duration: MOVE_DURATION,
+        easing: Easing.out(Easing.quad)
+      });
+      playerY.value = withTiming(nextPos.y * size, { 
+        duration: MOVE_DURATION,
+        easing: Easing.out(Easing.quad)
+      });
+      
+      if (Platform.OS !== "web") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      
+      setTimeout(moveToNext, MOVE_DURATION);
+    };
+    
+    moveToNext();
+  }, [playerX, playerY, playerScale, playerRotation]);
 
   const gridLayoutRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const gridViewRef = useRef<View>(null);
-  const cellSizeRef = useRef(cellSize);
-  cellSizeRef.current = cellSize;
 
   const mazeRowsRef = useRef(currentMaze.rows);
   const mazeColsRef = useRef(currentMaze.cols);
@@ -232,6 +284,8 @@ export default function GameScreen() {
   }, []);
 
   const handlePanStart = useCallback((touchX: number, touchY: number) => {
+    if (isAnimating) return;
+    
     const cell = getCellFromTouch(touchX, touchY);
     const currentPos = playerPositionRef.current;
     
@@ -244,10 +298,10 @@ export default function GameScreen() {
       drawnPathRef.current = [];
       setDrawnPath([]);
     }
-  }, [getCellFromTouch]);
+  }, [getCellFromTouch, isAnimating]);
 
   const handlePanUpdate = useCallback((touchX: number, touchY: number) => {
-    if (!isDrawingRef.current) return;
+    if (!isDrawingRef.current || isAnimating) return;
     
     const cell = getCellFromTouch(touchX, touchY);
     if (!cell) return;
@@ -284,27 +338,31 @@ export default function GameScreen() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     }
-  }, [getCellFromTouch]);
+  }, [getCellFromTouch, isAnimating]);
 
   const handlePanEnd = useCallback(() => {
-    if (!isDrawingRef.current) {
+    if (!isDrawingRef.current || isAnimating) {
       setDrawnPath([]);
       return;
     }
     
-    const path = drawnPathRef.current;
-    
-    if (path.length > 1) {
-      const finalPosition = path[path.length - 1];
-      setPlayerPosition(finalPosition);
-      setMoveCount((prev) => prev + (path.length - 1));
-      triggerMoveAnimation();
-    }
+    const path = [...drawnPathRef.current];
     
     isDrawingRef.current = false;
     drawnPathRef.current = [];
-    setDrawnPath([]);
-  }, [triggerMoveAnimation]);
+    
+    if (path.length > 1) {
+      setMoveCount((prev) => prev + (path.length - 1));
+      
+      animateAlongPath(path, () => {
+        const finalPosition = path[path.length - 1];
+        setPlayerPosition(finalPosition);
+        setDrawnPath([]);
+      });
+    } else {
+      setDrawnPath([]);
+    }
+  }, [animateAlongPath, isAnimating]);
 
   const panGesture = Gesture.Pan()
     .minDistance(0)
@@ -322,10 +380,14 @@ export default function GameScreen() {
     const newMaze = getRandomMaze(level);
     setCurrentMaze(newMaze);
     setPlayerPosition({ y: newMaze.start.y, x: newMaze.start.x });
+    playerX.value = newMaze.start.x * cellSizeRef.current;
+    playerY.value = newMaze.start.y * cellSizeRef.current;
+    playerRotation.value = 0;
     setMoveCount(0);
     setHasWon(false);
     setShowWinModal(false);
-  }, [level]);
+    setIsAnimating(false);
+  }, [level, playerX, playerY, playerRotation]);
 
   const playDifferentLevel = useCallback((newLevel: number) => {
     navigation.replace("Game", { level: newLevel, carIcon });
@@ -344,8 +406,6 @@ export default function GameScreen() {
 
   const renderCell = (rowIndex: number, colIndex: number) => {
     const cell = currentMaze.grid[rowIndex][colIndex];
-    const isPlayer =
-      playerPosition.y === rowIndex && playerPosition.x === colIndex;
     const isEnd =
       currentMaze.end.y === rowIndex && currentMaze.end.x === colIndex;
     const isInPath = drawnPath.some(p => p.y === rowIndex && p.x === colIndex);
@@ -371,17 +431,10 @@ export default function GameScreen() {
           },
         ]}
       >
-        {isInPath && !isPlayer ? (
+        {isInPath ? (
           <View style={[styles.pathDot, { width: cellSize * 0.3, height: cellSize * 0.3 }]} />
         ) : null}
-        {isPlayer ? (
-          <Animated.View style={[styles.playerContainer, animatedPlayerStyle]}>
-            <View style={styles.carContainer}>
-              <Feather name={carIcon} size={iconSize} color={MazeColors.player} />
-            </View>
-          </Animated.View>
-        ) : null}
-        {isEnd && !isPlayer && !isInPath ? (
+        {isEnd && !isInPath ? (
           <Animated.View style={[styles.goalContainer, animatedGoalStyle]}>
             <Feather name="flag" size={iconSize * 0.7} color={MazeColors.success} />
           </Animated.View>
@@ -434,6 +487,21 @@ export default function GameScreen() {
                 </View>
               ))}
             </View>
+            
+            <Animated.View 
+              style={[
+                styles.floatingPlayer,
+                {
+                  width: cellSize,
+                  height: cellSize,
+                },
+                animatedPlayerStyle
+              ]}
+            >
+              <View style={styles.carContainer}>
+                <Feather name={carIcon} size={iconSize} color={MazeColors.player} />
+              </View>
+            </Animated.View>
           </View>
         </GestureDetector>
       </View>
@@ -541,6 +609,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 4,
     borderColor: MazeColors.walls,
+    position: "relative",
   },
   gridContainer: {
     flexDirection: "column",
@@ -552,9 +621,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  playerContainer: {
+  floatingPlayer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 10,
   },
   carContainer: {
     justifyContent: "center",
