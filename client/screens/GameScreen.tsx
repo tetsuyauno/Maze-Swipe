@@ -612,8 +612,8 @@ export default function GameScreen() {
                 animatedPlayerStyle
               ]}
             >
-              <View style={styles.carContainer}>
-                <Feather name={carIcon} size={iconSize} color={MazeColors.player} />
+              <View style={[styles.carContainer, { transform: [{ rotate: '180deg' }] }]}>
+                <Feather name={carIcon} size={iconSize} color={theme.walls} />
               </View>
             </Animated.View>
           </View>
