@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+import { Platform, ImageSourcePropType } from "react-native";
 
 export const MazeColors = {
   background: "#FFE5B4",
@@ -17,6 +17,7 @@ export type MazeTheme = {
   name: string;
   icon: string;
   background: string;
+  backgroundImage: ImageSourcePropType;
   gridPath: string;
   walls: string;
   pathHighlight: string;
@@ -28,6 +29,7 @@ export const MAZE_THEMES: Record<string, MazeTheme> = {
     name: "Classic",
     icon: "sun",
     background: "#FFE5B4",
+    backgroundImage: require("../../assets/backgrounds/classic-bg.png"),
     gridPath: "#FFF8DC",
     walls: "#8B4513",
     pathHighlight: "rgba(255, 165, 0, 0.4)",
@@ -37,6 +39,7 @@ export const MAZE_THEMES: Record<string, MazeTheme> = {
     name: "Candy",
     icon: "heart",
     background: "#FFB6C1",
+    backgroundImage: require("../../assets/backgrounds/candy-bg.png"),
     gridPath: "#FFF0F5",
     walls: "#FF69B4",
     pathHighlight: "rgba(255, 105, 180, 0.3)",
@@ -46,6 +49,7 @@ export const MAZE_THEMES: Record<string, MazeTheme> = {
     name: "Ocean",
     icon: "droplet",
     background: "#87CEEB",
+    backgroundImage: require("../../assets/backgrounds/ocean-bg.png"),
     gridPath: "#E0FFFF",
     walls: "#4169E1",
     pathHighlight: "rgba(65, 105, 225, 0.3)",
@@ -55,6 +59,7 @@ export const MAZE_THEMES: Record<string, MazeTheme> = {
     name: "Jungle",
     icon: "feather",
     background: "#90EE90",
+    backgroundImage: require("../../assets/backgrounds/jungle-bg.png"),
     gridPath: "#F0FFF0",
     walls: "#228B22",
     pathHighlight: "rgba(34, 139, 34, 0.3)",
@@ -64,6 +69,7 @@ export const MAZE_THEMES: Record<string, MazeTheme> = {
     name: "Space",
     icon: "star",
     background: "#2C3E50",
+    backgroundImage: require("../../assets/backgrounds/space-bg.png"),
     gridPath: "#34495E",
     walls: "#9B59B6",
     pathHighlight: "rgba(155, 89, 182, 0.4)",

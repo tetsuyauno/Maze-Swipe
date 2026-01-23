@@ -6,6 +6,7 @@ import {
   Platform,
   Modal,
   Pressable,
+  ImageBackground,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -473,19 +474,26 @@ export default function GameScreen() {
   };
 
   return (
-    <View
+    <ImageBackground
+      source={theme.backgroundImage}
       style={[
         styles.container,
         {
           backgroundColor: theme.background,
+        },
+      ]}
+      resizeMode="cover"
+    >
+      <View style={[
+        styles.contentWrapper,
+        {
           paddingTop: insets.top + Spacing.sm,
           paddingBottom: insets.bottom + Spacing.sm,
           paddingLeft: insets.left + Spacing.sm,
           paddingRight: insets.right + Spacing.sm,
         },
-      ]}
-    >
-      <View style={styles.content}>
+      ]}>
+        <View style={styles.content}>
         <GestureDetector gesture={panGesture}>
           <View 
             ref={gridViewRef}
@@ -499,6 +507,11 @@ export default function GameScreen() {
                 </View>
               ))}
             </View>
+
+            <View style={[styles.roundedCornerTL, { backgroundColor: theme.walls }]} />
+            <View style={[styles.roundedCornerTR, { backgroundColor: theme.walls }]} />
+            <View style={[styles.roundedCornerBL, { backgroundColor: theme.walls }]} />
+            <View style={[styles.roundedCornerBR, { backgroundColor: theme.walls }]} />
             
             <Animated.View 
               style={[
@@ -575,7 +588,8 @@ export default function GameScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+      </View>
+    </ImageBackground>
   );
 }
 
@@ -583,6 +597,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: MazeColors.background,
+  },
+  contentWrapper: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -650,6 +667,38 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
+  },
+  roundedCornerTL: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 12,
+    height: 12,
+    borderBottomRightRadius: 12,
+  },
+  roundedCornerTR: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 12,
+    height: 12,
+    borderBottomLeftRadius: 12,
+  },
+  roundedCornerBL: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: 12,
+    height: 12,
+    borderTopRightRadius: 12,
+  },
+  roundedCornerBR: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 12,
+    height: 12,
+    borderTopLeftRadius: 12,
   },
   floatingPlayer: {
     position: "absolute",
