@@ -418,6 +418,13 @@ export default function GameScreen() {
     const isEnd =
       currentMaze.end.y === rowIndex && currentMaze.end.x === colIndex;
     const isInPath = drawnPath.some(p => p.y === rowIndex && p.x === colIndex);
+    
+    const cornerRadius = WALL_THICKNESS * 1.5;
+    
+    const hasNorth = cell.north;
+    const hasSouth = cell.south;
+    const hasWest = cell.west;
+    const hasEast = cell.east;
 
     return (
       <View
@@ -435,17 +442,49 @@ export default function GameScreen() {
           },
         ]}
       >
-        {cell.north ? (
-          <View style={[styles.wallTop, { backgroundColor: theme.walls, height: WALL_THICKNESS }]} />
+        {hasNorth ? (
+          <View style={[
+            styles.wallTop, 
+            { 
+              backgroundColor: theme.walls, 
+              height: WALL_THICKNESS,
+              borderBottomLeftRadius: !hasWest ? cornerRadius : 0,
+              borderBottomRightRadius: !hasEast ? cornerRadius : 0,
+            }
+          ]} />
         ) : null}
-        {cell.south ? (
-          <View style={[styles.wallBottom, { backgroundColor: theme.walls, height: WALL_THICKNESS }]} />
+        {hasSouth ? (
+          <View style={[
+            styles.wallBottom, 
+            { 
+              backgroundColor: theme.walls, 
+              height: WALL_THICKNESS,
+              borderTopLeftRadius: !hasWest ? cornerRadius : 0,
+              borderTopRightRadius: !hasEast ? cornerRadius : 0,
+            }
+          ]} />
         ) : null}
-        {cell.west ? (
-          <View style={[styles.wallLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS }]} />
+        {hasWest ? (
+          <View style={[
+            styles.wallLeft, 
+            { 
+              backgroundColor: theme.walls, 
+              width: WALL_THICKNESS,
+              borderTopRightRadius: !hasNorth ? cornerRadius : 0,
+              borderBottomRightRadius: !hasSouth ? cornerRadius : 0,
+            }
+          ]} />
         ) : null}
-        {cell.east ? (
-          <View style={[styles.wallRight, { backgroundColor: theme.walls, width: WALL_THICKNESS }]} />
+        {hasEast ? (
+          <View style={[
+            styles.wallRight, 
+            { 
+              backgroundColor: theme.walls, 
+              width: WALL_THICKNESS,
+              borderTopLeftRadius: !hasNorth ? cornerRadius : 0,
+              borderBottomLeftRadius: !hasSouth ? cornerRadius : 0,
+            }
+          ]} />
         ) : null}
         
         {hasCornerTopLeft(rowIndex, colIndex) ? (
@@ -508,11 +547,6 @@ export default function GameScreen() {
               ))}
             </View>
 
-            <View style={[styles.roundedCornerTL, { backgroundColor: theme.walls }]} />
-            <View style={[styles.roundedCornerTR, { backgroundColor: theme.walls }]} />
-            <View style={[styles.roundedCornerBL, { backgroundColor: theme.walls }]} />
-            <View style={[styles.roundedCornerBR, { backgroundColor: theme.walls }]} />
-            
             <Animated.View 
               style={[
                 styles.floatingPlayer,
@@ -667,38 +701,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-  },
-  roundedCornerTL: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: 12,
-    height: 12,
-    borderBottomRightRadius: 12,
-  },
-  roundedCornerTR: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 12,
-    height: 12,
-    borderBottomLeftRadius: 12,
-  },
-  roundedCornerBL: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: 12,
-    height: 12,
-    borderTopRightRadius: 12,
-  },
-  roundedCornerBR: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 12,
-    height: 12,
-    borderTopLeftRadius: 12,
   },
   floatingPlayer: {
     position: "absolute",
