@@ -116,15 +116,49 @@ function generateMazeFromCell(startY: number, startX: number, rows: number, cols
   return grid;
 }
 
-function getStartEndPositions(level: number, rows: number, cols: number): { start: Cell; end: Cell } {
-  const cornerPairs: { start: Cell; end: Cell }[] = [
-    { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
-    { start: { y: rows - 1, x: cols - 1 }, end: { y: 0, x: 0 } },
-    { start: { y: 0, x: cols - 1 }, end: { y: rows - 1, x: 0 } },
-    { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
+function findFarthestCell(grid: CellWalls[][], start: Cell, rows: number, cols: number): Cell {
+  const distances: number[][] = Array(rows).fill(null).map(() => Array(cols).fill(-1));
+  const queue: Cell[] = [start];
+  distances[start.y][start.x] = 0;
+  
+  let farthestCell = start;
+  let maxDistance = 0;
+  
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const { y, x } = current;
+    const currentDistance = distances[y][x];
+    
+    if (currentDistance > maxDistance) {
+      maxDistance = currentDistance;
+      farthestCell = current;
+    }
+    
+    for (const { dir, dy, dx } of DIRECTIONS) {
+      const newY = y + dy;
+      const newX = x + dx;
+      
+      if (isValidCell(newY, newX, rows, cols) && 
+          distances[newY][newX] === -1 && 
+          !grid[y][x][dir]) {
+        distances[newY][newX] = currentDistance + 1;
+        queue.push({ y: newY, x: newX });
+      }
+    }
+  }
+  
+  return farthestCell;
+}
+
+function getRandomStartPosition(rows: number, cols: number): Cell {
+  const corners: Cell[] = [
+    { y: 0, x: 0 },
+    { y: rows - 1, x: cols - 1 },
+    { y: 0, x: cols - 1 },
+    { y: rows - 1, x: 0 },
   ];
   
-  return cornerPairs[Math.floor(Math.random() * cornerPairs.length)];
+  return corners[Math.floor(Math.random() * corners.length)];
 }
 
 export function generateMaze(level: number): MazeData {
@@ -132,8 +166,9 @@ export function generateMaze(level: number): MazeData {
   const sizeConfig = MAZE_SIZES[clampedLevel];
   const { rows, cols } = sizeConfig;
   
-  const { start, end } = getStartEndPositions(level, rows, cols);
+  const start = getRandomStartPosition(rows, cols);
   const grid = generateMazeFromCell(start.y, start.x, rows, cols);
+  const end = findFarthestCell(grid, start, rows, cols);
   
   return { grid, start, end, rows, cols };
 }
