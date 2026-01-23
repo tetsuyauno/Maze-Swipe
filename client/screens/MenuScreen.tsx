@@ -3,9 +3,10 @@ import {
   View,
   StyleSheet,
   Pressable,
+  Image,
+  ImageSourcePropType,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
@@ -15,6 +16,14 @@ import { MAZE_SIZES } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Menu">;
+
+const LEVEL_IMAGES: Record<number, ImageSourcePropType> = {
+  1: require("../../assets/levels/level1.png"),
+  2: require("../../assets/levels/level2.png"),
+  3: require("../../assets/levels/level3.png"),
+  4: require("../../assets/levels/level4.png"),
+  5: require("../../assets/levels/level5.png"),
+};
 
 export default function MenuScreen() {
   const insets = useSafeAreaInsets();
@@ -50,13 +59,11 @@ export default function MenuScreen() {
                 style={styles.levelButton}
                 onPress={() => handleSelectLevel(level)}
               >
-                <View style={styles.levelIconWrapper}>
-                  <Feather
-                    name={sizeConfig.icon}
-                    size={32}
-                    color={MazeColors.player}
-                  />
-                </View>
+                <Image
+                  source={LEVEL_IMAGES[level]}
+                  style={styles.levelImage}
+                  resizeMode="contain"
+                />
                 <ThemedText style={styles.levelSize}>
                   {sizeConfig.label}
                 </ThemedText>
@@ -99,13 +106,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
+    padding: Spacing.xs,
   },
-  levelIconWrapper: {
-    marginBottom: Spacing.xs,
+  levelImage: {
+    width: 60,
+    height: 60,
   },
   levelSize: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: MazeColors.textPrimary,
+    marginTop: 2,
   },
 });
