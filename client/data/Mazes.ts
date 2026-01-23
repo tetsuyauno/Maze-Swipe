@@ -117,39 +117,14 @@ function generateMazeFromCell(startY: number, startX: number, rows: number, cols
 }
 
 function getStartEndPositions(level: number, rows: number, cols: number): { start: Cell; end: Cell } {
-  const positionSets: { start: Cell; end: Cell }[][] = [
-    [{ start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } }],
-    
-    [
-      { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
-      { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
-    ],
-    
-    [
-      { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
-      { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
-      { start: { y: 0, x: cols - 1 }, end: { y: rows - 1, x: 0 } },
-    ],
-    
-    [
-      { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
-      { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
-      { start: { y: 0, x: cols - 1 }, end: { y: rows - 1, x: 0 } },
-      { start: { y: Math.floor(rows / 2), x: 0 }, end: { y: Math.floor(rows / 2), x: cols - 1 } },
-    ],
-    
-    [
-      { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
-      { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
-      { start: { y: 0, x: cols - 1 }, end: { y: rows - 1, x: 0 } },
-      { start: { y: Math.floor(rows / 2), x: 0 }, end: { y: Math.floor(rows / 2), x: cols - 1 } },
-      { start: { y: 0, x: Math.floor(cols / 2) }, end: { y: rows - 1, x: Math.floor(cols / 2) } },
-    ],
+  const cornerPairs: { start: Cell; end: Cell }[] = [
+    { start: { y: 0, x: 0 }, end: { y: rows - 1, x: cols - 1 } },
+    { start: { y: rows - 1, x: cols - 1 }, end: { y: 0, x: 0 } },
+    { start: { y: 0, x: cols - 1 }, end: { y: rows - 1, x: 0 } },
+    { start: { y: rows - 1, x: 0 }, end: { y: 0, x: cols - 1 } },
   ];
   
-  const levelIndex = Math.max(0, Math.min(4, level - 1));
-  const positions = positionSets[levelIndex];
-  return positions[Math.floor(Math.random() * positions.length)];
+  return cornerPairs[Math.floor(Math.random() * cornerPairs.length)];
 }
 
 export function generateMaze(level: number): MazeData {
