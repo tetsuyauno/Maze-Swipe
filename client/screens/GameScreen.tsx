@@ -421,7 +421,7 @@ export default function GameScreen() {
     
     const cornerRadius = WALL_THICKNESS;
     const innerCornerSize = WALL_THICKNESS * 2;
-    const cellBgColor = isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath;
+    const cellBgColor = isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : 'rgba(255, 255, 255, 0.3)';
     
     const hasNorth = cell.north;
     const hasSouth = cell.south;
@@ -440,7 +440,7 @@ export default function GameScreen() {
               ? theme.pathHighlight 
               : isEnd 
                 ? theme.goalColor 
-                : theme.gridPath,
+                : 'rgba(255, 255, 255, 0.3)',
           },
         ]}
       >
