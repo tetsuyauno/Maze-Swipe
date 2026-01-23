@@ -419,7 +419,8 @@ export default function GameScreen() {
       currentMaze.end.y === rowIndex && currentMaze.end.x === colIndex;
     const isInPath = drawnPath.some(p => p.y === rowIndex && p.x === colIndex);
     
-    const cornerRadius = WALL_THICKNESS * 1.5;
+    const innerCornerSize = WALL_THICKNESS * 2;
+    const cellBgColor = isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath;
     
     const hasNorth = cell.north;
     const hasSouth = cell.south;
@@ -488,100 +489,69 @@ export default function GameScreen() {
         ) : null}
         
         {hasCornerTopLeft(rowIndex, colIndex) ? (
-          <View style={[
-            styles.cornerTopLeft, 
-            { 
-              backgroundColor: theme.walls, 
-              width: WALL_THICKNESS, 
-              height: WALL_THICKNESS,
-            }
-          ]}>
-            {(hasNorth && hasWest) ? (
-              <View style={[
-                styles.innerCornerCurve,
-                {
-                  backgroundColor: isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath,
-                  width: cornerRadius,
-                  height: cornerRadius,
-                  borderTopLeftRadius: cornerRadius,
-                  right: 0,
-                  bottom: 0,
-                }
-              ]} />
-            ) : null}
-          </View>
+          <View style={[styles.cornerTopLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
         ) : null}
         {hasCornerTopRight(rowIndex, colIndex) ? (
-          <View style={[
-            styles.cornerTopRight, 
-            { 
-              backgroundColor: theme.walls, 
-              width: WALL_THICKNESS, 
-              height: WALL_THICKNESS,
-            }
-          ]}>
-            {(hasNorth && hasEast) ? (
-              <View style={[
-                styles.innerCornerCurve,
-                {
-                  backgroundColor: isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath,
-                  width: cornerRadius,
-                  height: cornerRadius,
-                  borderTopRightRadius: cornerRadius,
-                  left: 0,
-                  bottom: 0,
-                }
-              ]} />
-            ) : null}
-          </View>
+          <View style={[styles.cornerTopRight, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
         ) : null}
         {hasCornerBottomLeft(rowIndex, colIndex) ? (
-          <View style={[
-            styles.cornerBottomLeft, 
-            { 
-              backgroundColor: theme.walls, 
-              width: WALL_THICKNESS, 
-              height: WALL_THICKNESS,
-            }
-          ]}>
-            {(hasSouth && hasWest) ? (
-              <View style={[
-                styles.innerCornerCurve,
-                {
-                  backgroundColor: isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath,
-                  width: cornerRadius,
-                  height: cornerRadius,
-                  borderBottomLeftRadius: cornerRadius,
-                  right: 0,
-                  top: 0,
-                }
-              ]} />
-            ) : null}
-          </View>
+          <View style={[styles.cornerBottomLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
         ) : null}
         {hasCornerBottomRight(rowIndex, colIndex) ? (
+          <View style={[styles.cornerBottomRight, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+        ) : null}
+        
+        {(hasNorth && hasWest) ? (
           <View style={[
-            styles.cornerBottomRight, 
-            { 
-              backgroundColor: theme.walls, 
-              width: WALL_THICKNESS, 
-              height: WALL_THICKNESS,
+            styles.innerCornerCurve,
+            {
+              backgroundColor: cellBgColor,
+              width: innerCornerSize,
+              height: innerCornerSize,
+              borderTopLeftRadius: innerCornerSize,
+              top: WALL_THICKNESS,
+              left: WALL_THICKNESS,
             }
-          ]}>
-            {(hasSouth && hasEast) ? (
-              <View style={[
-                styles.innerCornerCurve,
-                {
-                  backgroundColor: isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath,
-                  width: cornerRadius,
-                  height: cornerRadius,
-                  borderBottomRightRadius: cornerRadius,
-                  left: 0,
-                  top: 0,
-                }
-              ]} />
-            ) : null}
-          </View>
+          ]} />
+        ) : null}
+        {(hasNorth && hasEast) ? (
+          <View style={[
+            styles.innerCornerCurve,
+            {
+              backgroundColor: cellBgColor,
+              width: innerCornerSize,
+              height: innerCornerSize,
+              borderTopRightRadius: innerCornerSize,
+              top: WALL_THICKNESS,
+              right: WALL_THICKNESS,
+            }
+          ]} />
+        ) : null}
+        {(hasSouth && hasWest) ? (
+          <View style={[
+            styles.innerCornerCurve,
+            {
+              backgroundColor: cellBgColor,
+              width: innerCornerSize,
+              height: innerCornerSize,
+              borderBottomLeftRadius: innerCornerSize,
+              bottom: WALL_THICKNESS,
+              left: WALL_THICKNESS,
+            }
+          ]} />
+        ) : null}
+        {(hasSouth && hasEast) ? (
+          <View style={[
+            styles.innerCornerCurve,
+            {
+              backgroundColor: cellBgColor,
+              width: innerCornerSize,
+              height: innerCornerSize,
+              borderBottomRightRadius: innerCornerSize,
+              bottom: WALL_THICKNESS,
+              right: WALL_THICKNESS,
+            }
+          ]} />
         ) : null}
 
         {isInPath ? (
@@ -660,18 +630,6 @@ export default function GameScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalLeft}>
               <ThemedText style={styles.winTitle}>Amazing!</ThemedText>
-              
-              <View style={styles.starsContainer}>
-                {[1, 2, 3].map((star) => (
-                  <Feather
-                    key={star}
-                    name="star"
-                    size={28}
-                    color={star <= getStarRating() ? "#FFD700" : "#E0E0E0"}
-                    style={styles.star}
-                  />
-                ))}
-              </View>
 
               <ThemedText style={styles.movesSummary}>
                 {sizeConfig.label} in {moveCount} moves
