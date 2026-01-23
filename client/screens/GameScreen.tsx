@@ -27,6 +27,7 @@ import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { ThemedText } from "@/components/ThemedText";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing, MazeColors, MAZE_THEMES, MazeTheme } from "@/constants/theme";
 import { CellWalls, getRandomMaze, MazeData, CarIconName, MAZE_SIZES } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -118,6 +119,7 @@ export default function GameScreen() {
   const route = useRoute<GameRouteProp>();
   const navigation = useNavigation<GameNavProp>();
   const insets = useSafeAreaInsets();
+  const { t, language } = useLanguage();
 
   const { level, carIcon, theme: themeName } = route.params;
   const sizeConfig = MAZE_SIZES[level];
@@ -636,25 +638,28 @@ export default function GameScreen() {
           <Confetti />
           <View style={styles.modalContent}>
             <View style={styles.modalLeft}>
-              <ThemedText style={styles.winTitle}>Amazing!</ThemedText>
+              <ThemedText style={styles.winTitle}>{t('game.amazing')}</ThemedText>
 
               <ThemedText style={styles.movesSummary}>
-                {sizeConfig.label} in {moveCount} moves
+                {language === 'ja' 
+                  ? `${sizeConfig.label} ${moveCount}${t('game.movesUnit')}`
+                  : `${sizeConfig.label} ${t('game.movesIn')} ${moveCount} ${t('game.movesUnit')}`
+                }
               </ThemedText>
 
               <Pressable style={styles.primaryButton} onPress={playNewMazeSameLevel}>
                 <Feather name="refresh-cw" size={16} color="#FFFFFF" />
-                <ThemedText style={styles.primaryButtonText}>Play Again</ThemedText>
+                <ThemedText style={styles.primaryButtonText}>{t('game.playAgain')}</ThemedText>
               </Pressable>
               
               <Pressable style={styles.menuButton} onPress={goToMenu}>
                 <Feather name="home" size={14} color={MazeColors.textPrimary} />
-                <ThemedText style={styles.menuButtonText}>Menu</ThemedText>
+                <ThemedText style={styles.menuButtonText}>{t('game.menu')}</ThemedText>
               </Pressable>
             </View>
 
             <View style={styles.modalRight}>
-              <ThemedText style={styles.sectionLabel}>Try Another Size</ThemedText>
+              <ThemedText style={styles.sectionLabel}>{t('game.tryAnother')}</ThemedText>
               <View style={styles.levelButtonsRow}>
                 {[1, 2, 3, 4, 5].filter(l => l !== level).map((lvl) => (
                   <Pressable
