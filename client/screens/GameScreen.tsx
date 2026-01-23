@@ -57,16 +57,21 @@ function canMoveBetween(from: Position, to: Position, grid: CellWalls[][]): bool
 }
 
 function ConfettiPiece({ delay, color }: { delay: number; color: string }) {
-  const translateY = useSharedValue(-50);
+  const translateY = useSharedValue(400);
   const translateX = useSharedValue((Math.random() - 0.5) * 300);
   const rotate = useSharedValue(0);
   const opacity = useSharedValue(1);
+  const scale = useSharedValue(0.5);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      translateY.value = withTiming(400, { duration: 2000, easing: Easing.out(Easing.quad) });
-      rotate.value = withRepeat(withTiming(360, { duration: 500 }), 4, false);
-      opacity.value = withTiming(0, { duration: 2000 });
+      translateY.value = withTiming(-100, { duration: 1500, easing: Easing.out(Easing.quad) });
+      rotate.value = withRepeat(withTiming(360, { duration: 400 }), 4, false);
+      scale.value = withSequence(
+        withTiming(1.2, { duration: 300 }),
+        withTiming(1, { duration: 200 })
+      );
+      opacity.value = withTiming(0, { duration: 1500 });
     }, delay);
     return () => clearTimeout(timeout);
   }, []);
@@ -76,6 +81,7 @@ function ConfettiPiece({ delay, color }: { delay: number; color: string }) {
       { translateY: translateY.value },
       { translateX: translateX.value },
       { rotate: `${rotate.value}deg` },
+      { scale: scale.value },
     ],
     opacity: opacity.value,
   }));
@@ -872,6 +878,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     overflow: "hidden",
     pointerEvents: "none",
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   confettiPiece: {
     position: "absolute",
