@@ -13,6 +13,64 @@ export const MazeColors = {
   headerBg: "#87CEEB",
 };
 
+export type MazeTheme = {
+  name: string;
+  icon: string;
+  background: string;
+  gridPath: string;
+  walls: string;
+  pathHighlight: string;
+  goalColor: string;
+};
+
+export const MAZE_THEMES: Record<string, MazeTheme> = {
+  classic: {
+    name: "Classic",
+    icon: "sun",
+    background: "#FFE5B4",
+    gridPath: "#FFF8DC",
+    walls: "#8B4513",
+    pathHighlight: "rgba(255, 165, 0, 0.4)",
+    goalColor: "#90EE90",
+  },
+  candy: {
+    name: "Candy",
+    icon: "heart",
+    background: "#FFB6C1",
+    gridPath: "#FFF0F5",
+    walls: "#FF69B4",
+    pathHighlight: "rgba(255, 105, 180, 0.3)",
+    goalColor: "#98FB98",
+  },
+  ocean: {
+    name: "Ocean",
+    icon: "droplet",
+    background: "#87CEEB",
+    gridPath: "#E0FFFF",
+    walls: "#4169E1",
+    pathHighlight: "rgba(65, 105, 225, 0.3)",
+    goalColor: "#FFD700",
+  },
+  jungle: {
+    name: "Jungle",
+    icon: "feather",
+    background: "#90EE90",
+    gridPath: "#F0FFF0",
+    walls: "#228B22",
+    pathHighlight: "rgba(34, 139, 34, 0.3)",
+    goalColor: "#FFD700",
+  },
+  space: {
+    name: "Space",
+    icon: "star",
+    background: "#2C3E50",
+    gridPath: "#34495E",
+    walls: "#9B59B6",
+    pathHighlight: "rgba(155, 89, 182, 0.4)",
+    goalColor: "#FFD700",
+  },
+};
+
 const tintColorLight = "#FF6B35";
 const tintColorDark = "#FF6B35";
 

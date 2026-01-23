@@ -19,6 +19,7 @@ export type RootStackParamList = {
   Game: {
     level: number;
     carIcon: CarIconName;
+    theme: string;
   };
   Settings: undefined;
 };

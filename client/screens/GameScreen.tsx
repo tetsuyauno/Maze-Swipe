@@ -26,11 +26,11 @@ import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Spacing, MazeColors } from "@/constants/theme";
+import { Spacing, MazeColors, MAZE_THEMES, MazeTheme } from "@/constants/theme";
 import { CellWalls, getRandomMaze, MazeData, CarIconName, MAZE_SIZES } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
-const WALL_THICKNESS = 4;
+const WALL_THICKNESS = 5;
 const MOVE_DURATION = 150;
 
 type Position = { y: number; x: number };
@@ -112,8 +112,9 @@ export default function GameScreen() {
   const navigation = useNavigation<GameNavProp>();
   const insets = useSafeAreaInsets();
 
-  const { level, carIcon } = route.params;
+  const { level, carIcon, theme: themeName } = route.params;
   const sizeConfig = MAZE_SIZES[level];
+  const theme = MAZE_THEMES[themeName] || MAZE_THEMES.classic;
 
   const [currentMaze, setCurrentMaze] = useState<MazeData>(() => getRandomMaze(level));
   const [playerPosition, setPlayerPosition] = useState<Position>({
@@ -376,8 +377,8 @@ export default function GameScreen() {
   }, [level, playerX, playerY]);
 
   const playDifferentLevel = useCallback((newLevel: number) => {
-    navigation.replace("Game", { level: newLevel, carIcon });
-  }, [navigation, carIcon]);
+    navigation.replace("Game", { level: newLevel, carIcon, theme: themeName });
+  }, [navigation, carIcon, themeName]);
 
   const goToMenu = useCallback(() => {
     setShowWinModal(false);
@@ -389,6 +390,26 @@ export default function GameScreen() {
     if (moveCount <= baseMoves) return 3;
     if (moveCount <= baseMoves + 4) return 2;
     return 1;
+  };
+
+  const hasCornerTopLeft = (rowIndex: number, colIndex: number) => {
+    const cell = currentMaze.grid[rowIndex][colIndex];
+    return cell.north || cell.west;
+  };
+
+  const hasCornerTopRight = (rowIndex: number, colIndex: number) => {
+    const cell = currentMaze.grid[rowIndex][colIndex];
+    return cell.north || cell.east;
+  };
+
+  const hasCornerBottomLeft = (rowIndex: number, colIndex: number) => {
+    const cell = currentMaze.grid[rowIndex][colIndex];
+    return cell.south || cell.west;
+  };
+
+  const hasCornerBottomRight = (rowIndex: number, colIndex: number) => {
+    const cell = currentMaze.grid[rowIndex][colIndex];
+    return cell.south || cell.east;
   };
 
   const renderCell = (rowIndex: number, colIndex: number) => {
@@ -406,20 +427,41 @@ export default function GameScreen() {
             width: cellSize,
             height: cellSize,
             backgroundColor: isInPath 
-              ? "rgba(255, 165, 0, 0.4)" 
+              ? theme.pathHighlight 
               : isEnd 
-                ? "#90EE90" 
-                : MazeColors.gridPath,
-            borderTopWidth: cell.north ? WALL_THICKNESS : 0,
-            borderBottomWidth: cell.south ? WALL_THICKNESS : 0,
-            borderLeftWidth: cell.west ? WALL_THICKNESS : 0,
-            borderRightWidth: cell.east ? WALL_THICKNESS : 0,
-            borderColor: MazeColors.walls,
+                ? theme.goalColor 
+                : theme.gridPath,
           },
         ]}
       >
+        {cell.north ? (
+          <View style={[styles.wallTop, { backgroundColor: theme.walls, height: WALL_THICKNESS }]} />
+        ) : null}
+        {cell.south ? (
+          <View style={[styles.wallBottom, { backgroundColor: theme.walls, height: WALL_THICKNESS }]} />
+        ) : null}
+        {cell.west ? (
+          <View style={[styles.wallLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS }]} />
+        ) : null}
+        {cell.east ? (
+          <View style={[styles.wallRight, { backgroundColor: theme.walls, width: WALL_THICKNESS }]} />
+        ) : null}
+        
+        {hasCornerTopLeft(rowIndex, colIndex) ? (
+          <View style={[styles.cornerTopLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+        ) : null}
+        {hasCornerTopRight(rowIndex, colIndex) ? (
+          <View style={[styles.cornerTopRight, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+        ) : null}
+        {hasCornerBottomLeft(rowIndex, colIndex) ? (
+          <View style={[styles.cornerBottomLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+        ) : null}
+        {hasCornerBottomRight(rowIndex, colIndex) ? (
+          <View style={[styles.cornerBottomRight, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+        ) : null}
+
         {isInPath ? (
-          <View style={[styles.pathDot, { width: cellSize * 0.3, height: cellSize * 0.3 }]} />
+          <View style={[styles.pathDot, { width: cellSize * 0.25, height: cellSize * 0.25, backgroundColor: theme.walls }]} />
         ) : null}
         {isEnd && !isInPath ? (
           <Animated.View style={[styles.goalContainer, animatedGoalStyle]}>
@@ -435,6 +477,7 @@ export default function GameScreen() {
       style={[
         styles.container,
         {
+          backgroundColor: theme.background,
           paddingTop: insets.top + Spacing.sm,
           paddingBottom: insets.bottom + Spacing.sm,
           paddingLeft: insets.left + Spacing.sm,
@@ -446,7 +489,7 @@ export default function GameScreen() {
         <GestureDetector gesture={panGesture}>
           <View 
             ref={gridViewRef}
-            style={styles.gridWrapper}
+            style={[styles.gridWrapper, { borderColor: theme.walls }]}
             onLayout={updateGridPosition}
           >
             <View style={styles.gridContainer}>
@@ -550,8 +593,7 @@ const styles = StyleSheet.create({
   gridWrapper: {
     borderRadius: 16,
     overflow: "hidden",
-    borderWidth: 4,
-    borderColor: MazeColors.walls,
+    borderWidth: WALL_THICKNESS,
     position: "relative",
   },
   gridContainer: {
@@ -563,6 +605,51 @@ const styles = StyleSheet.create({
   cell: {
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
+  },
+  wallTop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  wallBottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  wallLeft: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+  },
+  wallRight: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    right: 0,
+  },
+  cornerTopLeft: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+  },
+  cornerTopRight: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+  },
+  cornerBottomLeft: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+  },
+  cornerBottomRight: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
   },
   floatingPlayer: {
     position: "absolute",
@@ -581,8 +668,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pathDot: {
-    backgroundColor: "rgba(255, 140, 0, 0.8)",
     borderRadius: 100,
+    opacity: 0.7,
   },
   modalOverlay: {
     flex: 1,
