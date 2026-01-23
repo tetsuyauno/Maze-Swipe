@@ -116,15 +116,13 @@ const styles = StyleSheet.create({
   },
   levelGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.md,
+    gap: Spacing.sm,
     justifyContent: "center",
-    maxWidth: 700,
   },
   levelButton: {
-    width: 120,
-    height: 120,
-    borderRadius: 20,
+    width: 100,
+    height: 100,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -134,13 +132,13 @@ const styles = StyleSheet.create({
   },
   levelButtonGradient: {
     flex: 1,
-    padding: 8,
+    padding: 6,
     alignItems: "center",
     justifyContent: "center",
   },
   levelImageWrapper: {
-    width: 80,
-    height: 70,
+    width: 65,
+    height: 55,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     justifyContent: "center",
@@ -148,8 +146,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   levelImage: {
-    width: 65,
-    height: 65,
+    width: 50,
+    height: 50,
   },
   levelSize: {
     fontSize: 16,

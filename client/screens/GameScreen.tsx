@@ -488,16 +488,48 @@ export default function GameScreen() {
         ) : null}
         
         {hasCornerTopLeft(rowIndex, colIndex) ? (
-          <View style={[styles.cornerTopLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+          <View style={[
+            styles.cornerTopLeft, 
+            { 
+              backgroundColor: theme.walls, 
+              width: WALL_THICKNESS, 
+              height: WALL_THICKNESS,
+              borderBottomRightRadius: (hasNorth && hasWest) ? cornerRadius : 0,
+            }
+          ]} />
         ) : null}
         {hasCornerTopRight(rowIndex, colIndex) ? (
-          <View style={[styles.cornerTopRight, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+          <View style={[
+            styles.cornerTopRight, 
+            { 
+              backgroundColor: theme.walls, 
+              width: WALL_THICKNESS, 
+              height: WALL_THICKNESS,
+              borderBottomLeftRadius: (hasNorth && hasEast) ? cornerRadius : 0,
+            }
+          ]} />
         ) : null}
         {hasCornerBottomLeft(rowIndex, colIndex) ? (
-          <View style={[styles.cornerBottomLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+          <View style={[
+            styles.cornerBottomLeft, 
+            { 
+              backgroundColor: theme.walls, 
+              width: WALL_THICKNESS, 
+              height: WALL_THICKNESS,
+              borderTopRightRadius: (hasSouth && hasWest) ? cornerRadius : 0,
+            }
+          ]} />
         ) : null}
         {hasCornerBottomRight(rowIndex, colIndex) ? (
-          <View style={[styles.cornerBottomRight, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
+          <View style={[
+            styles.cornerBottomRight, 
+            { 
+              backgroundColor: theme.walls, 
+              width: WALL_THICKNESS, 
+              height: WALL_THICKNESS,
+              borderTopLeftRadius: (hasSouth && hasEast) ? cornerRadius : 0,
+            }
+          ]} />
         ) : null}
 
         {isInPath ? (
