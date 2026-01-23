@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Switch, Alert, Pressable } from "react-native";
+import { View, StyleSheet, Switch, Alert, Pressable, ImageBackground } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 
@@ -31,15 +31,20 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          paddingTop: Spacing.xl,
-          paddingBottom: insets.bottom + Spacing.xl,
-        },
-      ]}
+    <ImageBackground
+      source={require("../../assets/backgrounds/menu-bg.png")}
+      style={styles.container}
+      resizeMode="cover"
     >
+      <View
+        style={[
+          styles.innerContainer,
+          {
+            paddingTop: Spacing.xl,
+            paddingBottom: insets.bottom + Spacing.xl,
+          },
+        ]}
+      >
       <View style={styles.section}>
         <View style={styles.settingRow}>
           <ThemedText style={styles.settingLabel}>Sound Effects</ThemedText>
@@ -76,14 +81,17 @@ export default function SettingsScreen() {
           <ThemedText style={styles.resetButtonText}>Start Over</ThemedText>
         </Pressable>
       </View>
-    </View>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MazeColors.background,
+  },
+  innerContainer: {
+    flex: 1,
     paddingHorizontal: Spacing.lg,
   },
   section: {

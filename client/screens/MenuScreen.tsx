@@ -5,6 +5,7 @@ import {
   Pressable,
   Image,
   ImageSourcePropType,
+  ImageBackground,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -28,7 +29,7 @@ const LEVEL_IMAGES: Record<number, ImageSourcePropType> = {
   5: require("../../assets/levels/level5.png"),
 };
 
-const LEVEL_COLORS: Record<number, string[]> = {
+const LEVEL_COLORS: Record<number, [string, string]> = {
   1: ["#A8D5BA", "#7CB894"],
   2: ["#F5D76E", "#D4AC0D"],
   3: ["#85C1E9", "#5DADE2"],
@@ -48,9 +49,10 @@ export default function MenuScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={["#B8E4F0", "#A5D8E6", "#93CCDC"]}
+    <ImageBackground
+      source={require("../../assets/backgrounds/menu-bg.png")}
       style={styles.container}
+      resizeMode="cover"
     >
       <View
         style={[
@@ -101,7 +103,7 @@ export default function MenuScreen() {
           </View>
         </View>
       </View>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 

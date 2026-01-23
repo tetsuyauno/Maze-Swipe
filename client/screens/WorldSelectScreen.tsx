@@ -23,7 +23,7 @@ type WorldSelectRouteProp = RouteProp<RootStackParamList, "WorldSelect">;
 
 const themeKeys = Object.keys(MAZE_THEMES);
 
-const THEME_COLORS: Record<string, string[]> = {
+const THEME_COLORS: Record<string, [string, string]> = {
   classic: ["#A8D5BA", "#7CB894"],
   candy: ["#FFB6C1", "#FF69B4"],
   ocean: ["#87CEEB", "#4169E1"],
@@ -48,9 +48,10 @@ export default function WorldSelectScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={["#B8E4F0", "#A5D8E6", "#93CCDC"]}
+    <ImageBackground
+      source={require("../../assets/backgrounds/menu-bg.png")}
       style={styles.container}
+      resizeMode="cover"
     >
       <View
         style={[
@@ -110,7 +111,7 @@ export default function WorldSelectScreen() {
           </View>
         </View>
       </View>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 

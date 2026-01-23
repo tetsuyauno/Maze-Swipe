@@ -3,13 +3,13 @@ import {
   View,
   StyleSheet,
   Pressable,
+  ImageBackground,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
@@ -38,9 +38,10 @@ export default function RideSelectScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={["#B8E4F0", "#A5D8E6", "#93CCDC"]}
+    <ImageBackground
+      source={require("../../assets/backgrounds/menu-bg.png")}
       style={styles.container}
+      resizeMode="cover"
     >
       <View
         style={[
@@ -97,7 +98,7 @@ export default function RideSelectScreen() {
           </Pressable>
         </View>
       </View>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 
