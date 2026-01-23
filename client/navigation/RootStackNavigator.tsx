@@ -1,5 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import SplashScreen from "@/screens/SplashScreen";
 import MenuScreen from "@/screens/MenuScreen";
 import RideSelectScreen from "@/screens/RideSelectScreen";
 import WorldSelectScreen from "@/screens/WorldSelectScreen";
@@ -9,6 +10,7 @@ import { useScreenOptions } from "@/hooks/useScreenOptions";
 import type { CarIconName } from "@/data/Mazes";
 
 export type RootStackParamList = {
+  Splash: undefined;
   Menu: undefined;
   RideSelect: {
     level: number;
@@ -31,12 +33,21 @@ export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
-    <Stack.Navigator screenOptions={screenOptions}>
+    <Stack.Navigator screenOptions={screenOptions} initialRouteName="Splash">
+      <Stack.Screen
+        name="Splash"
+        component={SplashScreen}
+        options={{
+          headerShown: false,
+          animation: "fade",
+        }}
+      />
       <Stack.Screen
         name="Menu"
         component={MenuScreen}
         options={{
           headerShown: false,
+          animation: "fade",
         }}
       />
       <Stack.Screen
