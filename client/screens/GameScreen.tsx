@@ -506,12 +506,12 @@ export default function GameScreen() {
           <View style={[
             styles.innerCornerCurve,
             {
-              backgroundColor: cellBgColor,
+              backgroundColor: theme.walls,
               width: innerCornerSize,
               height: innerCornerSize,
-              borderBottomRightRadius: innerCornerSize,
-              top: 0,
-              left: 0,
+              borderTopLeftRadius: innerCornerSize,
+              top: WALL_THICKNESS,
+              left: WALL_THICKNESS,
             }
           ]} />
         ) : null}
@@ -519,12 +519,12 @@ export default function GameScreen() {
           <View style={[
             styles.innerCornerCurve,
             {
-              backgroundColor: cellBgColor,
+              backgroundColor: theme.walls,
               width: innerCornerSize,
               height: innerCornerSize,
-              borderBottomLeftRadius: innerCornerSize,
-              top: 0,
-              right: 0,
+              borderTopRightRadius: innerCornerSize,
+              top: WALL_THICKNESS,
+              right: WALL_THICKNESS,
             }
           ]} />
         ) : null}
@@ -532,12 +532,12 @@ export default function GameScreen() {
           <View style={[
             styles.innerCornerCurve,
             {
-              backgroundColor: cellBgColor,
+              backgroundColor: theme.walls,
               width: innerCornerSize,
               height: innerCornerSize,
-              borderTopRightRadius: innerCornerSize,
-              bottom: 0,
-              left: 0,
+              borderBottomLeftRadius: innerCornerSize,
+              bottom: WALL_THICKNESS,
+              left: WALL_THICKNESS,
             }
           ]} />
         ) : null}
@@ -545,12 +545,12 @@ export default function GameScreen() {
           <View style={[
             styles.innerCornerCurve,
             {
-              backgroundColor: cellBgColor,
+              backgroundColor: theme.walls,
               width: innerCornerSize,
               height: innerCornerSize,
-              borderTopLeftRadius: innerCornerSize,
-              bottom: 0,
-              right: 0,
+              borderBottomRightRadius: innerCornerSize,
+              bottom: WALL_THICKNESS,
+              right: WALL_THICKNESS,
             }
           ]} />
         ) : null}
