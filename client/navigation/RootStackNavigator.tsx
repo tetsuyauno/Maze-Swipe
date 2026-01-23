@@ -1,20 +1,21 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { HeaderButton } from "@react-navigation/elements";
-import { Feather } from "@expo/vector-icons";
 import MenuScreen from "@/screens/MenuScreen";
 import RideSelectScreen from "@/screens/RideSelectScreen";
+import WorldSelectScreen from "@/screens/WorldSelectScreen";
 import GameScreen from "@/screens/GameScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
-import { HeaderTitle } from "@/components/HeaderTitle";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
-import { MazeColors } from "@/constants/theme";
 import type { CarIconName } from "@/data/Mazes";
 
 export type RootStackParamList = {
   Menu: undefined;
   RideSelect: {
     level: number;
+  };
+  WorldSelect: {
+    level: number;
+    carIcon: CarIconName;
   };
   Game: {
     level: number;
@@ -41,6 +42,13 @@ export default function RootStackNavigator() {
       <Stack.Screen
         name="RideSelect"
         component={RideSelectScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="WorldSelect"
+        component={WorldSelectScreen}
         options={{
           headerShown: false,
         }}

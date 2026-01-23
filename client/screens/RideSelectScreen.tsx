@@ -9,16 +9,15 @@ import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Spacing, MazeColors, MAZE_THEMES } from "@/constants/theme";
+import { Spacing, MazeColors } from "@/constants/theme";
 import { CAR_ICONS, CarIconName } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "RideSelect">;
 type RideSelectRouteProp = RouteProp<RootStackParamList, "RideSelect">;
-
-const themeKeys = Object.keys(MAZE_THEMES);
 
 export default function RideSelectScreen() {
   const insets = useSafeAreaInsets();
@@ -27,30 +26,32 @@ export default function RideSelectScreen() {
   
   const { level } = route.params;
   const [selectedIcon, setSelectedIcon] = useState<CarIconName>("truck");
-  const [selectedTheme, setSelectedTheme] = useState<string>("classic");
 
-  const handleStartGame = () => {
-    navigation.navigate("Game", {
+  const handleContinue = () => {
+    navigation.navigate("WorldSelect", {
       level,
       carIcon: selectedIcon,
-      theme: selectedTheme,
     });
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          paddingTop: insets.top + Spacing.sm,
-          paddingBottom: insets.bottom + Spacing.sm,
-          paddingLeft: insets.left + Spacing.md,
-          paddingRight: insets.right + Spacing.md,
-        },
-      ]}
+    <LinearGradient
+      colors={["#B8E4F0", "#A5D8E6", "#93CCDC"]}
+      style={styles.container}
     >
-      <View style={styles.leftSection}>
+      <View
+        style={[
+          styles.content,
+          {
+            paddingTop: insets.top + Spacing.md,
+            paddingBottom: insets.bottom + Spacing.md,
+            paddingLeft: insets.left + Spacing.lg,
+            paddingRight: insets.right + Spacing.lg,
+          },
+        ]}
+      >
         <ThemedText style={styles.title}>Pick Your Ride</ThemedText>
+        
         <View style={styles.iconGrid}>
           {CAR_ICONS.map((icon) => (
             <Pressable
@@ -63,7 +64,7 @@ export default function RideSelectScreen() {
             >
               <Feather
                 name={icon.name}
-                size={22}
+                size={28}
                 color={
                   selectedIcon === icon.name
                     ? "#FFFFFF"
@@ -81,92 +82,62 @@ export default function RideSelectScreen() {
             </Pressable>
           ))}
         </View>
-      </View>
 
-      <View style={styles.rightSection}>
-        <ThemedText style={styles.title}>Choose World</ThemedText>
-        <View style={styles.themeGrid}>
-          {themeKeys.map((key) => {
-            const theme = MAZE_THEMES[key];
-            const isSelected = selectedTheme === key;
-            return (
-              <Pressable
-                key={key}
-                style={[
-                  styles.themeButton,
-                  { backgroundColor: theme.gridPath, borderColor: theme.walls },
-                  isSelected && { borderWidth: 3 },
-                ]}
-                onPress={() => setSelectedTheme(key)}
-              >
-                <View style={[styles.themeIconBg, { backgroundColor: theme.walls }]}>
-                  <Feather
-                    name={theme.icon as any}
-                    size={16}
-                    color="#FFFFFF"
-                  />
-                </View>
-                <ThemedText style={[styles.themeLabel, { color: theme.walls }]}>
-                  {theme.name}
-                </ThemedText>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <Pressable style={styles.startButton} onPress={handleStartGame}>
-          <Feather name="play" size={20} color="#FFFFFF" />
-          <ThemedText style={styles.startButtonText}>Start</ThemedText>
+        <Pressable style={styles.nextButton} onPress={handleContinue}>
+          <ThemedText style={styles.nextButtonText}>Next</ThemedText>
+          <Feather name="arrow-right" size={20} color="#FFFFFF" />
         </Pressable>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MazeColors.background,
-    flexDirection: "row",
+  },
+  content: {
+    flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    gap: Spacing.xl,
-  },
-  leftSection: {
-    alignItems: "center",
-  },
-  rightSection: {
     alignItems: "center",
   },
   title: {
-    fontSize: 16,
+    fontSize: 28,
     fontWeight: "bold",
-    color: MazeColors.textPrimary,
-    marginBottom: Spacing.sm,
+    color: "#2C3E50",
+    marginBottom: Spacing.lg,
+    textShadowColor: "rgba(255,255,255,0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   iconGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: Spacing.xs,
+    gap: Spacing.md,
     justifyContent: "center",
-    maxWidth: 200,
+    maxWidth: 400,
   },
   iconButton: {
-    width: 56,
-    height: 56,
+    width: 72,
+    height: 72,
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   iconButtonSelected: {
     backgroundColor: MazeColors.player,
-    borderColor: MazeColors.player,
+    borderColor: "#FFFFFF",
   },
   iconLabel: {
-    fontSize: 8,
+    fontSize: 10,
     color: MazeColors.textSecondary,
     fontWeight: "600",
     marginTop: 2,
@@ -174,47 +145,25 @@ const styles = StyleSheet.create({
   iconLabelSelected: {
     color: "#FFFFFF",
   },
-  themeGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.xs,
-    justifyContent: "center",
-    maxWidth: 260,
-  },
-  themeButton: {
-    width: 64,
-    height: 56,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-  },
-  themeIconBg: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  themeLabel: {
-    fontSize: 9,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  startButton: {
+  nextButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: MazeColors.success,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xl,
-    borderRadius: 24,
-    marginTop: Spacing.md,
+    borderRadius: 30,
+    marginTop: Spacing.xl,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  startButtonText: {
+  nextButtonText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
-    marginLeft: Spacing.xs,
+    marginRight: Spacing.sm,
   },
 });
