@@ -20,7 +20,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Directory Structure
 - `client/` - React Native frontend code
-  - `screens/` - Screen components (GameScreen, SettingsScreen)
+  - `screens/` - Screen components (MenuScreen, RideSelectScreen, GameScreen, SettingsScreen)
   - `components/` - Reusable UI components
   - `navigation/` - Stack navigator configuration
   - `hooks/` - Custom React hooks
@@ -60,14 +60,19 @@ Preferred communication style: Simple, everyday language.
 - Haptic feedback on movement and blocked moves
 - Confetti animation and star rating (1-3 stars based on moves) when reaching goal
 
+### Navigation Flow
+1. **MenuScreen**: Select maze size (5 options: 5x3 to 9x6)
+2. **RideSelectScreen**: Pick your ride/vehicle icon
+3. **GameScreen**: Play the maze with selected size and ride
+
 ### Maze Sizes (Landscape Mode)
-The app runs in landscape orientation for a bigger maze experience:
+The app runs in landscape-only orientation for a bigger maze experience:
 - Level 1: 5 x 3 (5 columns, 3 rows) - smallest, easiest
 - Level 2: 6 x 4
 - Level 3: 7 x 5
 - Level 4: 8 x 5
 - Level 5: 9 x 6 (9 columns, 6 rows) - largest, most challenging
-- Menu displays maze sizes with icons instead of difficulty labels
+- Game screen maximizes maze size (no sidebar or title)
 - All mazes use same generation algorithm - complexity comes from size and random maze structure
 
 ## External Dependencies

@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HeaderButton } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import MenuScreen from "@/screens/MenuScreen";
+import RideSelectScreen from "@/screens/RideSelectScreen";
 import GameScreen from "@/screens/GameScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
@@ -12,6 +13,9 @@ import type { CarIconName } from "@/data/Mazes";
 
 export type RootStackParamList = {
   Menu: undefined;
+  RideSelect: {
+    level: number;
+  };
   Game: {
     level: number;
     carIcon: CarIconName;
@@ -30,19 +34,21 @@ export default function RootStackNavigator() {
         name="Menu"
         component={MenuScreen}
         options={{
-          headerTitle: () => <HeaderTitle title="Maze Adventure" />,
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="RideSelect"
+        component={RideSelectScreen}
+        options={{
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="Game"
         component={GameScreen}
         options={({ navigation }) => ({
-          headerTitle: () => <HeaderTitle title="Maze Adventure" />,
-          headerRight: () => (
-            <HeaderButton onPress={() => navigation.navigate("Settings")}>
-              <Feather name="settings" size={24} color={MazeColors.textPrimary} />
-            </HeaderButton>
-          ),
+          headerShown: false,
         })}
       />
       <Stack.Screen
