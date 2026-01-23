@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   levelImageWrapper: {
     width: 55,
     height: 45,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
