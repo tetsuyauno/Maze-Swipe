@@ -12,6 +12,8 @@ import type { RouteProp } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing, MazeColors } from "@/constants/theme";
 import { CAR_ICONS, CarIconName } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -23,6 +25,7 @@ export default function RideSelectScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RideSelectRouteProp>();
+  const { t } = useLanguage();
   
   const { level } = route.params;
   const [selectedIcon, setSelectedIcon] = useState<CarIconName>("truck");
@@ -43,50 +46,56 @@ export default function RideSelectScreen() {
         style={[
           styles.content,
           {
-            paddingTop: insets.top + Spacing.md,
-            paddingBottom: insets.bottom + Spacing.md,
-            paddingLeft: insets.left + Spacing.lg,
-            paddingRight: insets.right + Spacing.lg,
+            paddingTop: insets.top + Spacing.sm,
+            paddingBottom: insets.bottom + Spacing.sm,
+            paddingLeft: insets.left + Spacing.md,
+            paddingRight: insets.right + Spacing.md,
           },
         ]}
       >
-        <ThemedText style={styles.title}>Pick Your Ride</ThemedText>
-        
-        <View style={styles.iconGrid}>
-          {CAR_ICONS.map((icon) => (
-            <Pressable
-              key={icon.name}
-              style={[
-                styles.iconButton,
-                selectedIcon === icon.name && styles.iconButtonSelected,
-              ]}
-              onPress={() => setSelectedIcon(icon.name)}
-            >
-              <Feather
-                name={icon.name}
-                size={28}
-                color={
-                  selectedIcon === icon.name
-                    ? "#FFFFFF"
-                    : MazeColors.player
-                }
-              />
-              <ThemedText
-                style={[
-                  styles.iconLabel,
-                  selectedIcon === icon.name && styles.iconLabelSelected,
-                ]}
-              >
-                {icon.label}
-              </ThemedText>
-            </Pressable>
-          ))}
+        <View style={styles.header}>
+          <LanguageSwitch />
         </View>
+        
+        <View style={styles.mainContent}>
+          <ThemedText style={styles.title}>{t('ride.title')}</ThemedText>
+          
+          <View style={styles.iconGrid}>
+            {CAR_ICONS.map((icon) => (
+              <Pressable
+                key={icon.name}
+                style={[
+                  styles.iconButton,
+                  selectedIcon === icon.name && styles.iconButtonSelected,
+                ]}
+                onPress={() => setSelectedIcon(icon.name)}
+              >
+                <Feather
+                  name={icon.name}
+                  size={22}
+                  color={
+                    selectedIcon === icon.name
+                      ? "#FFFFFF"
+                      : MazeColors.player
+                  }
+                />
+                <ThemedText
+                  style={[
+                    styles.iconLabel,
+                    selectedIcon === icon.name && styles.iconLabelSelected,
+                  ]}
+                >
+                  {t(`ride.${icon.name}`)}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </View>
 
-        <Pressable style={styles.nextButton} onPress={handleContinue}>
-          <ThemedText style={styles.nextButtonText}>Next</ThemedText>
-          <Feather name="arrow-right" size={20} color="#FFFFFF" />
-        </Pressable>
+          <Pressable style={styles.nextButton} onPress={handleContinue}>
+            <ThemedText style={styles.nextButtonText}>{t('ride.next')}</ThemedText>
+            <Feather name="arrow-right" size={18} color="#FFFFFF" />
+          </Pressable>
+        </View>
       </View>
     </LinearGradient>
   );
@@ -98,33 +107,38 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  mainContent: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#2C3E50",
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
     textShadowColor: "rgba(255,255,255,0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   iconGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.md,
+    gap: Spacing.sm,
     justifyContent: "center",
-    maxWidth: 400,
   },
   iconButton: {
-    width: 72,
-    height: 72,
+    width: 60,
+    height: 60,
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: "transparent",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -137,7 +151,7 @@ const styles = StyleSheet.create({
     borderColor: "#FFFFFF",
   },
   iconLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: MazeColors.textSecondary,
     fontWeight: "600",
     marginTop: 2,
@@ -150,10 +164,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: MazeColors.success,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xl,
-    borderRadius: 30,
-    marginTop: Spacing.xl,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: 25,
+    marginTop: Spacing.md,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -162,7 +176,7 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     color: "#FFFFFF",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     marginRight: Spacing.sm,
   },

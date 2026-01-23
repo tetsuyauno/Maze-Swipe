@@ -1,0 +1,78 @@
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+type Language = 'en' | 'ja';
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+}
+
+const translations: Record<Language, Record<string, string>> = {
+  en: {
+    'menu.title': 'Choose Maze Size',
+    'ride.title': 'Pick Your Ride',
+    'ride.next': 'Next',
+    'world.title': 'Choose World',
+    'game.moves': 'Moves',
+    'game.replay': 'Replay',
+    'game.back': 'Back',
+    'game.complete': 'Complete!',
+    'ride.truck': 'Truck',
+    'ride.arrow': 'Arrow',
+    'ride.compass': 'Compass',
+    'ride.rocket': 'Rocket',
+    'ride.bolt': 'Bolt',
+    'ride.star': 'Star',
+    'world.classic': 'Classic',
+    'world.candy': 'Candy',
+    'world.ocean': 'Ocean',
+    'world.jungle': 'Jungle',
+    'world.space': 'Space',
+  },
+  ja: {
+    'menu.title': '迷路のサイズを選ぼう',
+    'ride.title': '乗り物を選ぼう',
+    'ride.next': '次へ',
+    'world.title': 'ワールドを選ぼう',
+    'game.moves': '移動',
+    'game.replay': 'もう一度',
+    'game.back': '戻る',
+    'game.complete': 'クリア！',
+    'ride.truck': 'トラック',
+    'ride.arrow': '矢印',
+    'ride.compass': 'コンパス',
+    'ride.rocket': 'ロケット',
+    'ride.bolt': '稲妻',
+    'ride.star': '星',
+    'world.classic': 'クラシック',
+    'world.candy': 'キャンディ',
+    'world.ocean': 'オーシャン',
+    'world.jungle': 'ジャングル',
+    'world.space': 'スペース',
+  },
+};
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguage] = useState<Language>('en');
+
+  const t = (key: string): string => {
+    return translations[language][key] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+}

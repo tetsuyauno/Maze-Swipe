@@ -494,9 +494,22 @@ export default function GameScreen() {
               backgroundColor: theme.walls, 
               width: WALL_THICKNESS, 
               height: WALL_THICKNESS,
-              borderBottomRightRadius: (hasNorth && hasWest) ? cornerRadius : 0,
             }
-          ]} />
+          ]}>
+            {(hasNorth && hasWest) ? (
+              <View style={[
+                styles.innerCornerCurve,
+                {
+                  backgroundColor: isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath,
+                  width: cornerRadius,
+                  height: cornerRadius,
+                  borderTopLeftRadius: cornerRadius,
+                  right: 0,
+                  bottom: 0,
+                }
+              ]} />
+            ) : null}
+          </View>
         ) : null}
         {hasCornerTopRight(rowIndex, colIndex) ? (
           <View style={[
@@ -505,9 +518,22 @@ export default function GameScreen() {
               backgroundColor: theme.walls, 
               width: WALL_THICKNESS, 
               height: WALL_THICKNESS,
-              borderBottomLeftRadius: (hasNorth && hasEast) ? cornerRadius : 0,
             }
-          ]} />
+          ]}>
+            {(hasNorth && hasEast) ? (
+              <View style={[
+                styles.innerCornerCurve,
+                {
+                  backgroundColor: isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath,
+                  width: cornerRadius,
+                  height: cornerRadius,
+                  borderTopRightRadius: cornerRadius,
+                  left: 0,
+                  bottom: 0,
+                }
+              ]} />
+            ) : null}
+          </View>
         ) : null}
         {hasCornerBottomLeft(rowIndex, colIndex) ? (
           <View style={[
@@ -516,9 +542,22 @@ export default function GameScreen() {
               backgroundColor: theme.walls, 
               width: WALL_THICKNESS, 
               height: WALL_THICKNESS,
-              borderTopRightRadius: (hasSouth && hasWest) ? cornerRadius : 0,
             }
-          ]} />
+          ]}>
+            {(hasSouth && hasWest) ? (
+              <View style={[
+                styles.innerCornerCurve,
+                {
+                  backgroundColor: isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath,
+                  width: cornerRadius,
+                  height: cornerRadius,
+                  borderBottomLeftRadius: cornerRadius,
+                  right: 0,
+                  top: 0,
+                }
+              ]} />
+            ) : null}
+          </View>
         ) : null}
         {hasCornerBottomRight(rowIndex, colIndex) ? (
           <View style={[
@@ -527,9 +566,22 @@ export default function GameScreen() {
               backgroundColor: theme.walls, 
               width: WALL_THICKNESS, 
               height: WALL_THICKNESS,
-              borderTopLeftRadius: (hasSouth && hasEast) ? cornerRadius : 0,
             }
-          ]} />
+          ]}>
+            {(hasSouth && hasEast) ? (
+              <View style={[
+                styles.innerCornerCurve,
+                {
+                  backgroundColor: isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath,
+                  width: cornerRadius,
+                  height: cornerRadius,
+                  borderBottomRightRadius: cornerRadius,
+                  left: 0,
+                  top: 0,
+                }
+              ]} />
+            ) : null}
+          </View>
         ) : null}
 
         {isInPath ? (
@@ -733,6 +785,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
+  },
+  innerCornerCurve: {
+    position: "absolute",
   },
   floatingPlayer: {
     position: "absolute",
