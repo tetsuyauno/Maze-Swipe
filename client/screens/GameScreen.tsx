@@ -506,12 +506,12 @@ export default function GameScreen() {
           <View style={[
             styles.innerCornerCurve,
             {
-              backgroundColor: theme.walls,
-              width: innerCornerSize,
-              height: innerCornerSize,
-              borderTopLeftRadius: innerCornerSize,
-              top: WALL_THICKNESS,
-              left: WALL_THICKNESS,
+              backgroundColor: cellBgColor,
+              width: WALL_THICKNESS,
+              height: WALL_THICKNESS,
+              borderBottomRightRadius: WALL_THICKNESS,
+              top: 0,
+              left: 0,
             }
           ]} />
         ) : null}
@@ -519,12 +519,12 @@ export default function GameScreen() {
           <View style={[
             styles.innerCornerCurve,
             {
-              backgroundColor: theme.walls,
-              width: innerCornerSize,
-              height: innerCornerSize,
-              borderTopRightRadius: innerCornerSize,
-              top: WALL_THICKNESS,
-              right: WALL_THICKNESS,
+              backgroundColor: cellBgColor,
+              width: WALL_THICKNESS,
+              height: WALL_THICKNESS,
+              borderBottomLeftRadius: WALL_THICKNESS,
+              top: 0,
+              right: 0,
             }
           ]} />
         ) : null}
@@ -532,12 +532,12 @@ export default function GameScreen() {
           <View style={[
             styles.innerCornerCurve,
             {
-              backgroundColor: theme.walls,
-              width: innerCornerSize,
-              height: innerCornerSize,
-              borderBottomLeftRadius: innerCornerSize,
-              bottom: WALL_THICKNESS,
-              left: WALL_THICKNESS,
+              backgroundColor: cellBgColor,
+              width: WALL_THICKNESS,
+              height: WALL_THICKNESS,
+              borderTopRightRadius: WALL_THICKNESS,
+              bottom: 0,
+              left: 0,
             }
           ]} />
         ) : null}
@@ -545,12 +545,12 @@ export default function GameScreen() {
           <View style={[
             styles.innerCornerCurve,
             {
-              backgroundColor: theme.walls,
-              width: innerCornerSize,
-              height: innerCornerSize,
-              borderBottomRightRadius: innerCornerSize,
-              bottom: WALL_THICKNESS,
-              right: WALL_THICKNESS,
+              backgroundColor: cellBgColor,
+              width: WALL_THICKNESS,
+              height: WALL_THICKNESS,
+              borderTopLeftRadius: WALL_THICKNESS,
+              bottom: 0,
+              right: 0,
             }
           ]} />
         ) : null}
