@@ -618,7 +618,7 @@ export default function GameScreen() {
                 animatedPlayerStyle
               ]}
             >
-              <View style={[styles.carContainer, { transform: [{ rotate: '180deg' }] }]}>
+              <View style={styles.carContainer}>
                 <Feather name={carIcon} size={iconSize} color={theme.walls} />
               </View>
             </Animated.View>
