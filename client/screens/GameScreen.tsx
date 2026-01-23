@@ -419,6 +419,7 @@ export default function GameScreen() {
       currentMaze.end.y === rowIndex && currentMaze.end.x === colIndex;
     const isInPath = drawnPath.some(p => p.y === rowIndex && p.x === colIndex);
     
+    const cornerRadius = WALL_THICKNESS;
     const innerCornerSize = WALL_THICKNESS * 2;
     const cellBgColor = isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : theme.gridPath;
     
@@ -508,9 +509,9 @@ export default function GameScreen() {
               backgroundColor: cellBgColor,
               width: innerCornerSize,
               height: innerCornerSize,
-              borderTopLeftRadius: innerCornerSize,
-              top: WALL_THICKNESS,
-              left: WALL_THICKNESS,
+              borderBottomRightRadius: innerCornerSize,
+              top: 0,
+              left: 0,
             }
           ]} />
         ) : null}
@@ -521,9 +522,9 @@ export default function GameScreen() {
               backgroundColor: cellBgColor,
               width: innerCornerSize,
               height: innerCornerSize,
-              borderTopRightRadius: innerCornerSize,
-              top: WALL_THICKNESS,
-              right: WALL_THICKNESS,
+              borderBottomLeftRadius: innerCornerSize,
+              top: 0,
+              right: 0,
             }
           ]} />
         ) : null}
@@ -534,9 +535,9 @@ export default function GameScreen() {
               backgroundColor: cellBgColor,
               width: innerCornerSize,
               height: innerCornerSize,
-              borderBottomLeftRadius: innerCornerSize,
-              bottom: WALL_THICKNESS,
-              left: WALL_THICKNESS,
+              borderTopRightRadius: innerCornerSize,
+              bottom: 0,
+              left: 0,
             }
           ]} />
         ) : null}
@@ -547,9 +548,9 @@ export default function GameScreen() {
               backgroundColor: cellBgColor,
               width: innerCornerSize,
               height: innerCornerSize,
-              borderBottomRightRadius: innerCornerSize,
-              bottom: WALL_THICKNESS,
-              right: WALL_THICKNESS,
+              borderTopLeftRadius: innerCornerSize,
+              bottom: 0,
+              right: 0,
             }
           ]} />
         ) : null}
