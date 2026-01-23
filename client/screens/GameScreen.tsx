@@ -595,6 +595,9 @@ export default function GameScreen() {
           paddingRight: insets.right + Spacing.sm,
         },
       ]}>
+        <Pressable style={styles.backToMenuButton} onPress={goToMenu}>
+          <Feather name="home" size={20} color="#FFFFFF" />
+        </Pressable>
         <View style={styles.content}>
         <GestureDetector gesture={panGesture}>
           <View 
@@ -688,6 +691,18 @@ const styles = StyleSheet.create({
   },
   contentWrapper: {
     flex: 1,
+  },
+  backToMenuButton: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
   content: {
     flex: 1,
