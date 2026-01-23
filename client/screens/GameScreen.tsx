@@ -6,7 +6,6 @@ import {
   Platform,
   Modal,
   Pressable,
-  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -381,6 +380,7 @@ export default function GameScreen() {
   }, [navigation, carIcon]);
 
   const goToMenu = useCallback(() => {
+    setShowWinModal(false);
     navigation.navigate("Menu");
   }, [navigation]);
 
@@ -483,20 +483,16 @@ export default function GameScreen() {
       >
         <View style={styles.modalOverlay}>
           <Confetti />
-          <ScrollView 
-            contentContainerStyle={styles.modalScrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.modalContent}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalLeft}>
               <ThemedText style={styles.winTitle}>Amazing!</ThemedText>
-              <ThemedText style={styles.winSubtitle}>You reached the goal!</ThemedText>
               
               <View style={styles.starsContainer}>
                 {[1, 2, 3].map((star) => (
                   <Feather
                     key={star}
                     name="star"
-                    size={36}
+                    size={28}
                     color={star <= getStarRating() ? "#FFD700" : "#E0E0E0"}
                     style={styles.star}
                   />
@@ -504,14 +500,21 @@ export default function GameScreen() {
               </View>
 
               <ThemedText style={styles.movesSummary}>
-                Completed {sizeConfig.label} maze in {moveCount} moves
+                {sizeConfig.label} in {moveCount} moves
               </ThemedText>
 
               <Pressable style={styles.primaryButton} onPress={playNewMazeSameLevel}>
-                <Feather name="refresh-cw" size={18} color="#FFFFFF" />
-                <ThemedText style={styles.primaryButtonText}>New {sizeConfig.label} Maze</ThemedText>
+                <Feather name="refresh-cw" size={16} color="#FFFFFF" />
+                <ThemedText style={styles.primaryButtonText}>Play Again</ThemedText>
               </Pressable>
+              
+              <Pressable style={styles.menuButton} onPress={goToMenu}>
+                <Feather name="home" size={14} color={MazeColors.textPrimary} />
+                <ThemedText style={styles.menuButtonText}>Menu</ThemedText>
+              </Pressable>
+            </View>
 
+            <View style={styles.modalRight}>
               <ThemedText style={styles.sectionLabel}>Try Another Size</ThemedText>
               <View style={styles.levelButtonsRow}>
                 {[1, 2, 3, 4, 5].filter(l => l !== level).map((lvl) => (
@@ -520,18 +523,13 @@ export default function GameScreen() {
                     style={styles.levelButton}
                     onPress={() => playDifferentLevel(lvl)}
                   >
-                    <Feather name={MAZE_SIZES[lvl].icon} size={16} color={MazeColors.player} />
+                    <Feather name={MAZE_SIZES[lvl].icon} size={18} color={MazeColors.player} />
                     <ThemedText style={styles.levelButtonLabel}>{MAZE_SIZES[lvl].label}</ThemedText>
                   </Pressable>
                 ))}
               </View>
-
-              <Pressable style={styles.menuButton} onPress={goToMenu}>
-                <Feather name="home" size={16} color={MazeColors.textPrimary} />
-                <ThemedText style={styles.menuButtonText}>Back to Menu</ThemedText>
-              </Pressable>
             </View>
-          </ScrollView>
+          </View>
         </View>
       </Modal>
     </View>
@@ -592,66 +590,63 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  modalScrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: Spacing.lg,
-  },
   modalContent: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: Spacing.lg,
+    borderRadius: 20,
+    padding: Spacing.md,
+    flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: Spacing.lg,
-    maxWidth: 380,
-    width: "90%",
+    maxHeight: "90%",
+  },
+  modalLeft: {
+    alignItems: "center",
+    paddingRight: Spacing.md,
+    borderRightWidth: 1,
+    borderRightColor: "#E0E0E0",
+    minWidth: 140,
+  },
+  modalRight: {
+    alignItems: "center",
+    paddingLeft: Spacing.md,
   },
   winTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "bold",
     color: MazeColors.success,
     marginBottom: Spacing.xs,
   },
-  winSubtitle: {
-    fontSize: 16,
-    color: MazeColors.textPrimary,
-    marginBottom: Spacing.md,
-  },
   starsContainer: {
     flexDirection: "row",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xs,
   },
   star: {
-    marginHorizontal: 4,
+    marginHorizontal: 2,
   },
   movesSummary: {
-    fontSize: 13,
+    fontSize: 12,
     color: MazeColors.textSecondary,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
     textAlign: "center",
   },
   primaryButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: MazeColors.player,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: 30,
-    width: "100%",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 20,
     justifyContent: "center",
   },
   primaryButtonText: {
     color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600",
-    marginLeft: Spacing.sm,
-  },
-  sectionLabel: {
     fontSize: 13,
     fontWeight: "600",
+    marginLeft: Spacing.xs,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: "600",
     color: MazeColors.textSecondary,
-    marginTop: Spacing.md,
     marginBottom: Spacing.sm,
   },
   levelButtonsRow: {
@@ -659,6 +654,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     gap: Spacing.xs,
+    maxWidth: 200,
   },
   levelButton: {
     backgroundColor: "#F0F0F0",
