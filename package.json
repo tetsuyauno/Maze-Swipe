@@ -8,8 +8,8 @@
     "all:dev": "concurrently \"npm run server:dev\" \"npm run expo:dev\"",
     "expo:start:static:build": "cross-env EXPO_PUBLIC_DOMAIN=localhost npx expo start --no-dev --minify --localhost",
     "expo:static:build": "node scripts/build.js",
-    "web:export": "npx expo export --platform web --output-dir dist/play",
-    "build": "npm run web:export && node -e \"const fs = require('fs'); fs.copyFileSync('index.html', 'dist/index.html'); console.log('Build v8 finalized.')\""
+    "web:export": "npx expo export --platform web",
+    "build": "npm run web:export && node -e \"const fs = require('fs'); if(!fs.existsSync('dist/play')) fs.mkdirSync('dist/play'); fs.renameSync('dist/index.html', 'dist/play/index.html'); fs.copyFileSync('index.html', 'dist/index.html'); console.log('Build v9 stabilized.')\""
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
