@@ -8,7 +8,7 @@
     "all:dev": "concurrently \"npm run server:dev\" \"npm run expo:dev\"",
     "expo:start:static:build": "cross-env EXPO_PUBLIC_DOMAIN=localhost npx expo start --no-dev --minify --localhost",
     "expo:static:build": "node scripts/build.js",
-    "web:export": "npx expo export --platform web",
+    "web:export": "npx expo export --platform web --output-dir dist/web",
     "server:build": "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=server_dist",
     "server:prod": "cross-env NODE_ENV=production node server_dist/index.js",
     "db:push": "drizzle-kit push",
@@ -17,7 +17,7 @@
     "check:types": "tsc --noEmit",
     "check:format": "prettier --check \"**/*.{js,ts,tsx,css,json}\"",
     "format": "prettier --write \"**/*.{js,ts,tsx,css,json}\"",
-    "build": "npm run web:export"
+    "build": "npm run web:export && cp index.html dist/index.html"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
