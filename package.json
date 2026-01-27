@@ -17,7 +17,7 @@
     "check:types": "tsc --noEmit",
     "check:format": "prettier --check \"**/*.{js,ts,tsx,css,json}\"",
     "format": "prettier --write \"**/*.{js,ts,tsx,css,json}\"",
-    "build": "npm run web:export && cp index.html dist/index.html"
+    "build": "npm run web:export && node -e \"require('fs').copyFileSync('index.html', 'dist/index.html')\""
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
