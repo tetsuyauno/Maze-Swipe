@@ -1,17 +1,15 @@
 {
     "version": 2,
+    "cleanUrls": true,
+    "trailingSlash": false,
     "rewrites": [
         {
             "source": "/web/(.*)",
-            "destination": "/web-dist/$1"
+            "destination": "/dist/$1"
         },
         {
             "source": "/web",
-            "destination": "/web-dist/index.html"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/api/index.ts"
+            "destination": "/dist/index.html"
         }
     ]
 }
