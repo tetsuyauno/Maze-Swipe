@@ -4,12 +4,20 @@ import {
   StyleSheet,
   Pressable,
   ImageBackground,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
@@ -18,17 +26,70 @@ import { Spacing, MazeColors } from "@/constants/theme";
 import { CAR_ICONS, CarIconName } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "RideSelect">;
 type RideSelectRouteProp = RouteProp<RootStackParamList, "RideSelect">;
+
+interface IconButtonProps {
+  icon: any;
+  isSelected: boolean;
+  onPress: () => void;
+  label: string;
+}
+
+function AnimatedIconButton({ icon, isSelected, onPress, label }: IconButtonProps) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePress = () => {
+    scale.value = withSequence(
+      withTiming(1.15, { duration: 100 }),
+      withSpring(1)
+    );
+    onPress();
+  };
+
+  return (
+    <AnimatedPressable
+      style={[
+        styles.iconButton,
+        isSelected && styles.iconButtonSelected,
+        animatedStyle,
+      ]}
+      onPress={handlePress}
+    >
+      <Image
+        source={icon.image}
+        style={[
+          styles.iconImage,
+          isSelected && styles.iconImageSelected,
+        ]}
+        resizeMode="contain"
+      />
+      <ThemedText
+        style={[
+          styles.iconLabel,
+          isSelected && styles.iconLabelSelected,
+        ]}
+      >
+        {label}
+      </ThemedText>
+    </AnimatedPressable>
+  );
+}
 
 export default function RideSelectScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RideSelectRouteProp>();
   const { t } = useLanguage();
-  
+
   const { level } = route.params;
-  const [selectedIcon, setSelectedIcon] = useState<CarIconName>("truck");
+  const [selectedIcon, setSelectedIcon] = useState<CarIconName>("submarine");
 
   const handleContinue = () => {
     navigation.navigate("WorldSelect", {
@@ -57,38 +118,19 @@ export default function RideSelectScreen() {
         <View style={styles.header}>
           <LanguageSwitch />
         </View>
-        
+
         <View style={styles.mainContent}>
           <ThemedText style={styles.title}>{t('ride.title')}</ThemedText>
-          
+
           <View style={styles.iconGrid}>
             {CAR_ICONS.map((icon) => (
-              <Pressable
+              <AnimatedIconButton
                 key={icon.name}
-                style={[
-                  styles.iconButton,
-                  selectedIcon === icon.name && styles.iconButtonSelected,
-                ]}
+                icon={icon}
+                isSelected={selectedIcon === icon.name}
                 onPress={() => setSelectedIcon(icon.name)}
-              >
-                <Feather
-                  name={icon.name}
-                  size={22}
-                  color={
-                    selectedIcon === icon.name
-                      ? "#FFFFFF"
-                      : MazeColors.player
-                  }
-                />
-                <ThemedText
-                  style={[
-                    styles.iconLabel,
-                    selectedIcon === icon.name && styles.iconLabelSelected,
-                  ]}
-                >
-                  {t(`ride.${icon.name}`)}
-                </ThemedText>
-              </Pressable>
+                label={t(`ride.${icon.name}`)}
+              />
             ))}
           </View>
 
@@ -129,12 +171,14 @@ const styles = StyleSheet.create({
   },
   iconGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: Spacing.sm,
     justifyContent: "center",
+    paddingHorizontal: Spacing.md,
   },
   iconButton: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     justifyContent: "center",
@@ -146,19 +190,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
+    marginBottom: Spacing.xs,
   },
   iconButtonSelected: {
-    backgroundColor: MazeColors.player,
-    borderColor: "#FFFFFF",
+    borderColor: MazeColors.player,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 3,
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
   },
   iconLabel: {
     fontSize: 9,
     color: MazeColors.textSecondary,
     fontWeight: "600",
     marginTop: 2,
+    textAlign: "center",
   },
   iconLabelSelected: {
-    color: "#FFFFFF",
+    color: MazeColors.player,
+    fontWeight: "bold",
+  },
+  iconImage: {
+    width: 36,
+    height: 36,
+    opacity: 0.7,
+  },
+  iconImageSelected: {
+    opacity: 1,
+    // tintColor: "#FFFFFF", // Removed as requested to keep original icon colors
   },
   nextButton: {
     flexDirection: "row",
@@ -168,7 +228,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     borderRadius: 25,
-    marginTop: Spacing.md,
+    marginTop: Spacing.xl,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,

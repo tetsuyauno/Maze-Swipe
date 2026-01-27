@@ -23,7 +23,11 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "themeColor": "#1A1A2E",
+      "backgroundColor": "#1A1A2E",
+      "display": "standalone",
+      "orientation": "landscape"
     },
     "plugins": [
       [

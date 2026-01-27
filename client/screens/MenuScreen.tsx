@@ -16,18 +16,11 @@ import { ThemedText } from "@/components/ThemedText";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing } from "@/constants/theme";
-import { MAZE_SIZES } from "@/data/Mazes";
+import { MAZE_SIZES, LEVEL_IMAGES } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Menu">;
 
-const LEVEL_IMAGES: Record<number, ImageSourcePropType> = {
-  1: require("../../assets/levels/level1.png"),
-  2: require("../../assets/levels/level2.png"),
-  3: require("../../assets/levels/level3.png"),
-  4: require("../../assets/levels/level4.png"),
-  5: require("../../assets/levels/level5.png"),
-};
 
 const LEVEL_COLORS: Record<number, [string, string]> = {
   1: ["#A8D5BA", "#7CB894"],
@@ -68,10 +61,10 @@ export default function MenuScreen() {
         <View style={styles.header}>
           <LanguageSwitch />
         </View>
-        
+
         <View style={styles.mainContent}>
           <ThemedText style={styles.title}>{t('menu.title')}</ThemedText>
-          
+
           <View style={styles.levelGrid}>
             {levels.map((level) => {
               const sizeConfig = MAZE_SIZES[level];

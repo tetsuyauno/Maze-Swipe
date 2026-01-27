@@ -7,6 +7,7 @@ import {
   Modal,
   Pressable,
   ImageBackground,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -29,7 +30,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ThemedText } from "@/components/ThemedText";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing, MazeColors, MAZE_THEMES, MazeTheme } from "@/constants/theme";
-import { CellWalls, getRandomMaze, MazeData, CarIconName, MAZE_SIZES } from "@/data/Mazes";
+import { CellWalls, getRandomMaze, MazeData, CarIconName, MAZE_SIZES, LEVEL_IMAGES, CAR_ICONS } from "@/data/Mazes";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const WALL_THICKNESS = 5;
@@ -41,7 +42,7 @@ type GameNavProp = NativeStackNavigationProp<RootStackParamList, "Game">;
 
 function canMoveBetween(from: Position, to: Position, grid: CellWalls[][]): boolean {
   const fromCell = grid[from.y][from.x];
-  
+
   if (to.y === from.y - 1 && to.x === from.x) {
     return !fromCell.north;
   }
@@ -131,6 +132,9 @@ export default function GameScreen() {
     x: currentMaze.start.x,
   });
   const [moveCount, setMoveCount] = useState(0);
+
+  const selectedIconData = CAR_ICONS.find(icon => icon.name === carIcon);
+  const iconSource = selectedIconData?.image;
   const [showWinModal, setShowWinModal] = useState(false);
   const [hasWon, setHasWon] = useState(false);
   const [drawnPath, setDrawnPath] = useState<Position[]>([]);
@@ -141,16 +145,16 @@ export default function GameScreen() {
 
   const playerPositionRef = useRef(playerPosition);
   playerPositionRef.current = playerPosition;
-  
+
   const drawnPathRef = useRef<Position[]>([]);
   const isDrawingRef = useRef(false);
 
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
-  
+
   const availableHeight = screenHeight - insets.top - insets.bottom - 20;
   const availableWidth = screenWidth - insets.left - insets.right - 20;
-  
+
   const cellSizeByHeight = Math.floor(availableHeight / currentMaze.rows);
   const cellSizeByWidth = Math.floor(availableWidth / currentMaze.cols);
   const cellSize = Math.min(cellSizeByHeight, cellSizeByWidth, 70);
@@ -209,40 +213,40 @@ export default function GameScreen() {
 
     setIsAnimating(true);
     const size = cellSizeRef.current;
-    
+
     let currentIndex = 0;
-    
+
     const moveToNext = () => {
       if (currentIndex >= path.length - 1) {
         setIsAnimating(false);
         onComplete();
         return;
       }
-      
+
       currentIndex++;
       const nextPos = path[currentIndex];
-      
+
       playerScale.value = withSequence(
         withTiming(1.15, { duration: MOVE_DURATION / 3 }),
         withTiming(1, { duration: MOVE_DURATION / 3 })
       );
-      
-      playerX.value = withTiming(nextPos.x * size, { 
+
+      playerX.value = withTiming(nextPos.x * size, {
         duration: MOVE_DURATION,
         easing: Easing.out(Easing.quad)
       });
-      playerY.value = withTiming(nextPos.y * size, { 
+      playerY.value = withTiming(nextPos.y * size, {
         duration: MOVE_DURATION,
         easing: Easing.out(Easing.quad)
       });
-      
+
       if (Platform.OS !== "web") {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-      
+
       setTimeout(moveToNext, MOVE_DURATION);
     };
-    
+
     moveToNext();
   }, [playerX, playerY, playerScale]);
 
@@ -266,26 +270,26 @@ export default function GameScreen() {
     const gridX = gridLayoutRef.current.x;
     const gridY = gridLayoutRef.current.y;
     const size = cellSizeRef.current;
-    
+
     const relativeX = touchX - gridX;
     const relativeY = touchY - gridY;
-    
+
     const col = Math.floor(relativeX / size);
     const row = Math.floor(relativeY / size);
-    
+
     if (col < 0 || col >= mazeColsRef.current || row < 0 || row >= mazeRowsRef.current) {
       return null;
     }
-    
+
     return { y: row, x: col };
   }, []);
 
   const handlePanStart = useCallback((touchX: number, touchY: number) => {
     if (isAnimating) return;
-    
+
     const cell = getCellFromTouch(touchX, touchY);
     const currentPos = playerPositionRef.current;
-    
+
     if (cell && cell.x === currentPos.x && cell.y === currentPos.y) {
       isDrawingRef.current = true;
       drawnPathRef.current = [currentPos];
@@ -299,19 +303,19 @@ export default function GameScreen() {
 
   const handlePanUpdate = useCallback((touchX: number, touchY: number) => {
     if (!isDrawingRef.current || isAnimating) return;
-    
+
     const cell = getCellFromTouch(touchX, touchY);
     if (!cell) return;
-    
+
     const currentPath = drawnPathRef.current;
     if (currentPath.length === 0) return;
-    
+
     const lastCell = currentPath[currentPath.length - 1];
-    
+
     if (cell.x === lastCell.x && cell.y === lastCell.y) {
       return;
     }
-    
+
     const existingIndex = currentPath.findIndex(p => p.x === cell.x && p.y === cell.y);
     if (existingIndex !== -1) {
       const newPath = currentPath.slice(0, existingIndex + 1);
@@ -319,18 +323,18 @@ export default function GameScreen() {
       setDrawnPath([...newPath]);
       return;
     }
-    
-    const isAdjacent = 
+
+    const isAdjacent =
       (Math.abs(cell.x - lastCell.x) === 1 && cell.y === lastCell.y) ||
       (Math.abs(cell.y - lastCell.y) === 1 && cell.x === lastCell.x);
-    
+
     if (!isAdjacent) return;
-    
+
     if (canMoveBetween(lastCell, cell, currentMazeRef.current.grid)) {
       const newPath = [...currentPath, cell];
       drawnPathRef.current = newPath;
       setDrawnPath([...newPath]);
-      
+
       if (Platform.OS !== "web") {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
@@ -342,15 +346,15 @@ export default function GameScreen() {
       setDrawnPath([]);
       return;
     }
-    
+
     const path = [...drawnPathRef.current];
-    
+
     isDrawingRef.current = false;
     drawnPathRef.current = [];
-    
+
     if (path.length > 1) {
       setMoveCount((prev) => prev + (path.length - 1));
-      
+
       animateAlongPath(path, () => {
         const finalPosition = path[path.length - 1];
         setPlayerPosition(finalPosition);
@@ -426,11 +430,11 @@ export default function GameScreen() {
     const isEnd =
       currentMaze.end.y === rowIndex && currentMaze.end.x === colIndex;
     const isInPath = drawnPath.some(p => p.y === rowIndex && p.x === colIndex);
-    
+
     const cornerRadius = WALL_THICKNESS;
     const innerCornerSize = WALL_THICKNESS * 2;
     const cellBgColor = isInPath ? theme.pathHighlight : isEnd ? theme.goalColor : 'rgba(255, 255, 255, 0.3)';
-    
+
     const hasNorth = cell.north;
     const hasSouth = cell.south;
     const hasWest = cell.west;
@@ -444,19 +448,19 @@ export default function GameScreen() {
           {
             width: cellSize,
             height: cellSize,
-            backgroundColor: isInPath 
-              ? theme.pathHighlight 
-              : isEnd 
-                ? theme.goalColor 
+            backgroundColor: isInPath
+              ? theme.pathHighlight
+              : isEnd
+                ? theme.goalColor
                 : 'rgba(255, 255, 255, 0.3)',
           },
         ]}
       >
         {hasNorth ? (
           <View style={[
-            styles.wallTop, 
-            { 
-              backgroundColor: theme.walls, 
+            styles.wallTop,
+            {
+              backgroundColor: theme.walls,
               height: WALL_THICKNESS,
               borderBottomLeftRadius: !hasWest ? cornerRadius : 0,
               borderBottomRightRadius: !hasEast ? cornerRadius : 0,
@@ -465,9 +469,9 @@ export default function GameScreen() {
         ) : null}
         {hasSouth ? (
           <View style={[
-            styles.wallBottom, 
-            { 
-              backgroundColor: theme.walls, 
+            styles.wallBottom,
+            {
+              backgroundColor: theme.walls,
               height: WALL_THICKNESS,
               borderTopLeftRadius: !hasWest ? cornerRadius : 0,
               borderTopRightRadius: !hasEast ? cornerRadius : 0,
@@ -476,9 +480,9 @@ export default function GameScreen() {
         ) : null}
         {hasWest ? (
           <View style={[
-            styles.wallLeft, 
-            { 
-              backgroundColor: theme.walls, 
+            styles.wallLeft,
+            {
+              backgroundColor: theme.walls,
               width: WALL_THICKNESS,
               borderTopRightRadius: !hasNorth ? cornerRadius : 0,
               borderBottomRightRadius: !hasSouth ? cornerRadius : 0,
@@ -487,16 +491,16 @@ export default function GameScreen() {
         ) : null}
         {hasEast ? (
           <View style={[
-            styles.wallRight, 
-            { 
-              backgroundColor: theme.walls, 
+            styles.wallRight,
+            {
+              backgroundColor: theme.walls,
               width: WALL_THICKNESS,
               borderTopLeftRadius: !hasNorth ? cornerRadius : 0,
               borderBottomLeftRadius: !hasSouth ? cornerRadius : 0,
             }
           ]} />
         ) : null}
-        
+
         {hasCornerTopLeft(rowIndex, colIndex) ? (
           <View style={[styles.cornerTopLeft, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
         ) : null}
@@ -509,7 +513,7 @@ export default function GameScreen() {
         {hasCornerBottomRight(rowIndex, colIndex) ? (
           <View style={[styles.cornerBottomRight, { backgroundColor: theme.walls, width: WALL_THICKNESS, height: WALL_THICKNESS }]} />
         ) : null}
-        
+
         {(hasNorth && hasWest) ? (
           <View style={[
             styles.innerCornerCurve,
@@ -599,86 +603,100 @@ export default function GameScreen() {
           <Feather name="home" size={20} color="#FFFFFF" />
         </Pressable>
         <View style={styles.content}>
-        <GestureDetector gesture={panGesture}>
-          <View 
-            ref={gridViewRef}
-            style={[styles.gridWrapper, { borderColor: theme.walls }]}
-            onLayout={updateGridPosition}
-          >
-            <View style={styles.gridContainer}>
-              {currentMaze.grid.map((row, rowIndex) => (
-                <View key={rowIndex} style={styles.row}>
-                  {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
-                </View>
-              ))}
-            </View>
-
-            <Animated.View 
-              style={[
-                styles.floatingPlayer,
-                {
-                  width: cellSize,
-                  height: cellSize,
-                },
-                animatedPlayerStyle
-              ]}
+          <GestureDetector gesture={panGesture}>
+            <View
+              ref={gridViewRef}
+              style={[styles.gridWrapper, { borderColor: theme.walls }]}
+              onLayout={updateGridPosition}
             >
-              <View style={styles.carContainer}>
-                <Feather name={carIcon} size={iconSize} color={theme.walls} />
-              </View>
-            </Animated.View>
-          </View>
-        </GestureDetector>
-      </View>
-
-      <Modal
-        visible={showWinModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowWinModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <Confetti />
-          <View style={styles.modalContent}>
-            <View style={styles.modalLeft}>
-              <ThemedText style={styles.winTitle}>{t('game.amazing')}</ThemedText>
-
-              <ThemedText style={styles.movesSummary}>
-                {language === 'ja' 
-                  ? `${sizeConfig.label} ${moveCount}${t('game.movesUnit')}`
-                  : `${sizeConfig.label} ${t('game.movesIn')} ${moveCount} ${t('game.movesUnit')}`
-                }
-              </ThemedText>
-
-              <Pressable style={styles.primaryButton} onPress={playNewMazeSameLevel}>
-                <Feather name="refresh-cw" size={16} color="#FFFFFF" />
-                <ThemedText style={styles.primaryButtonText}>{t('game.playAgain')}</ThemedText>
-              </Pressable>
-              
-              <Pressable style={styles.menuButton} onPress={goToMenu}>
-                <Feather name="home" size={14} color={MazeColors.textPrimary} />
-                <ThemedText style={styles.menuButtonText}>{t('game.menu')}</ThemedText>
-              </Pressable>
-            </View>
-
-            <View style={styles.modalRight}>
-              <ThemedText style={styles.sectionLabel}>{t('game.tryAnother')}</ThemedText>
-              <View style={styles.levelButtonsRow}>
-                {[1, 2, 3, 4, 5].filter(l => l !== level).map((lvl) => (
-                  <Pressable
-                    key={lvl}
-                    style={styles.levelButton}
-                    onPress={() => playDifferentLevel(lvl)}
-                  >
-                    <Feather name={MAZE_SIZES[lvl].icon} size={18} color={MazeColors.player} />
-                    <ThemedText style={styles.levelButtonLabel}>{MAZE_SIZES[lvl].label}</ThemedText>
-                  </Pressable>
+              <View style={styles.gridContainer}>
+                {currentMaze.grid.map((row, rowIndex) => (
+                  <View key={rowIndex} style={styles.row}>
+                    {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
+                  </View>
                 ))}
               </View>
+
+              <Animated.View
+                style={[
+                  styles.floatingPlayer,
+                  {
+                    width: cellSize,
+                    height: cellSize,
+                  },
+                  animatedPlayerStyle
+                ]}
+              >
+                <View style={styles.carContainer}>
+                  {iconSource ? (
+                    <Image
+                      source={iconSource}
+                      style={{ width: iconSize, height: iconSize }}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <Feather name="box" size={iconSize} color={theme.walls} />
+                  )}
+                </View>
+              </Animated.View>
+            </View>
+          </GestureDetector>
+        </View>
+
+        <Modal
+          visible={showWinModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowWinModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Confetti />
+            <View style={styles.modalContent}>
+              <View style={styles.modalLeft}>
+                <ThemedText style={styles.winTitle}>{t('game.amazing')}</ThemedText>
+
+                <ThemedText style={styles.movesSummary}>
+                  {language === 'ja'
+                    ? `${sizeConfig.label} ${moveCount}${t('game.movesUnit')}`
+                    : `${sizeConfig.label} ${t('game.movesIn')} ${moveCount} ${t('game.movesUnit')}`
+                  }
+                </ThemedText>
+
+                <Pressable style={styles.primaryButton} onPress={playNewMazeSameLevel}>
+                  <Feather name="refresh-cw" size={16} color="#FFFFFF" />
+                  <ThemedText style={styles.primaryButtonText}>{t('game.playAgain')}</ThemedText>
+                </Pressable>
+
+                <Pressable style={styles.menuButton} onPress={goToMenu}>
+                  <Feather name="home" size={14} color={MazeColors.textPrimary} />
+                  <ThemedText style={styles.menuButtonText}>{t('game.menu')}</ThemedText>
+                </Pressable>
+              </View>
+
+              <View style={styles.modalRight}>
+                <ThemedText style={styles.sectionLabel}>{t('game.tryAnother')}</ThemedText>
+                <View style={styles.levelButtonsRow}>
+                  {[1, 2, 3, 4, 5].filter(l => l !== level).map((lvl) => (
+                    <Pressable
+                      key={lvl}
+                      style={styles.levelButton}
+                      onPress={() => playDifferentLevel(lvl)}
+                    >
+                      <View style={styles.levelImageWrapper}>
+                        <Image
+                          source={LEVEL_IMAGES[lvl]}
+                          style={styles.levelImage}
+                          resizeMode="contain"
+                        />
+                      </View>
+                      <ThemedText style={styles.levelButtonLabel}>{MAZE_SIZES[lvl].label}</ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
       </View>
     </ImageBackground>
   );
@@ -802,22 +820,45 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: Spacing.md,
+    borderRadius: 24,
+    padding: Spacing.lg,
     flexDirection: "row",
-    alignItems: "center",
-    maxHeight: "90%",
+    gap: Spacing.xl,
+    width: "85%",
+    maxWidth: 600,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   modalLeft: {
+    flex: 1.2,
     alignItems: "center",
     paddingRight: Spacing.md,
     borderRightWidth: 1,
     borderRightColor: "#E0E0E0",
     minWidth: 140,
+    justifyContent: "center",
   },
   modalRight: {
+    flex: 1,
     alignItems: "center",
     paddingLeft: Spacing.md,
+    justifyContent: "center",
+  },
+  levelImageWrapper: {
+    width: 40,
+    height: 32,
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  levelImage: {
+    width: 28,
+    height: 28,
   },
   winTitle: {
     fontSize: 22,
