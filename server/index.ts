@@ -156,13 +156,19 @@ function serveLandingPage({
 }
 
 function configureExpoAndLanding(app: express.Application) {
-  const templatePath = path.resolve(
-    process.cwd(),
-    "server",
+  // Use __dirname for better portability in bundled environments like Vercel
+  const templatePath = path.join(
+    __dirname,
     "templates",
     "landing-page.html",
   );
-  const landingPageTemplate = fs.readFileSync(templatePath, "utf-8");
+
+  // Fallback if __dirname is in api/ instead of server/
+  const finalTemplatePath = fs.existsSync(templatePath)
+    ? templatePath
+    : path.resolve(process.cwd(), "server", "templates", "landing-page.html");
+
+  const landingPageTemplate = fs.readFileSync(finalTemplatePath, "utf-8");
   const appName = getAppName();
 
   log("Serving static Expo files with dynamic manifest routing");
@@ -196,8 +202,8 @@ function configureExpoAndLanding(app: express.Application) {
 
     if (req.path.startsWith("/web")) {
       const filePath = req.path === "/web" || req.path === "/web/"
-        ? path.resolve(process.cwd(), "dist", "index.html")
-        : path.resolve(process.cwd(), "dist", req.path.replace("/web/", ""));
+        ? path.resolve(process.cwd(), "web-dist", "index.html")
+        : path.resolve(process.cwd(), "web-dist", req.path.replace("/web/", ""));
 
       if (fs.existsSync(filePath)) {
         return res.sendFile(filePath);
@@ -209,7 +215,7 @@ function configureExpoAndLanding(app: express.Application) {
 
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
   app.use(express.static(path.resolve(process.cwd(), "static-build")));
-  app.use(express.static(path.resolve(process.cwd(), "dist")));
+  app.use(express.static(path.resolve(process.cwd(), "web-dist")));
 
   log("Expo routing: Checking expo-platform header on / and /manifest");
 }

@@ -3,11 +3,11 @@
     "rewrites": [
         {
             "source": "/web/(.*)",
-            "destination": "/dist/$1"
+            "destination": "/web-dist/$1"
         },
         {
             "source": "/web",
-            "destination": "/dist/index.html"
+            "destination": "/web-dist/index.html"
         },
         {
             "source": "/(.*)",
