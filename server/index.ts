@@ -172,7 +172,11 @@ function configureExpoAndLanding(app: express.Application) {
       return next();
     }
 
-    if (req.path !== "/" && req.path !== "/manifest") {
+    // Allow root, manifest, and web routes to proceed to the next blocks
+    const allowedPaths = ["/", "/manifest", "/web"];
+    const isAllowed = allowedPaths.some(p => req.path === p || req.path.startsWith(p + "/"));
+
+    if (!isAllowed) {
       return next();
     }
 
@@ -223,29 +227,37 @@ function setupErrorHandler(app: express.Application) {
 
     res.status(status).json({ message });
 
-    throw err;
+    // In production/serverless, we might not want to throw and crash the worker
+    if (process.env.NODE_ENV !== "production") {
+      log("Error:", err);
+    }
   });
 }
 
-(async () => {
-  setupCors(app);
-  setupBodyParsing(app);
-  setupRequestLogging(app);
+// Initialize the app
+setupCors(app);
+setupBodyParsing(app);
+setupRequestLogging(app);
+configureExpoAndLanding(app);
 
-  configureExpoAndLanding(app);
+// Export the app for Vercel
+export default app;
 
-  const server = await registerRoutes(app);
+// Only listen if this is the main module and not running on Vercel
+if (process.env.NODE_ENV !== "test" && !process.env.VERCEL) {
+  (async () => {
+    const server = await registerRoutes(app);
+    setupErrorHandler(app);
 
-  setupErrorHandler(app);
-
-  const port = parseInt(process.env.PORT || "5000", 10);
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-    },
-    () => {
-      log(`express server serving on port ${port}`);
-    },
-  );
-})();
+    const port = parseInt(process.env.PORT || "5000", 10);
+    server.listen(
+      {
+        port,
+        host: "0.0.0.0",
+      },
+      () => {
+        log(`express server serving on port ${port}`);
+      },
+    );
+  })();
+}

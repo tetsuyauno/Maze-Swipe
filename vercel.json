@@ -1,11 +1,5 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "package.json",
-            "use": "@vercel/node"
-        }
-    ],
     "rewrites": [
         {
             "source": "/web/(.*)",
@@ -17,7 +11,7 @@
         },
         {
             "source": "/(.*)",
-            "destination": "server_dist/index.js"
+            "destination": "/api/index.ts"
         }
     ]
 }
