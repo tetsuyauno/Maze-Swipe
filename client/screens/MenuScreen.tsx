@@ -6,6 +6,7 @@ import {
   Image,
   ImageSourcePropType,
   ImageBackground,
+  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -35,7 +36,11 @@ export default function MenuScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { t } = useLanguage();
 
+  const { width, height } = Dimensions.get("window");
   const levels = [1, 2, 3, 4, 5];
+
+  const availableWidth = width - insets.left - insets.right - (Spacing.md * 2);
+  const buttonSize = Math.floor(Math.min(90, (availableWidth - (Spacing.sm * 4)) / 5));
 
   const handleSelectLevel = (level: number) => {
     navigation.navigate("RideSelect", { level });
@@ -51,10 +56,10 @@ export default function MenuScreen() {
         style={[
           styles.content,
           {
-            paddingTop: insets.top + Spacing.sm,
-            paddingBottom: insets.bottom + Spacing.sm,
-            paddingLeft: insets.left + Spacing.md,
-            paddingRight: insets.right + Spacing.md,
+            paddingTop: insets.top + Spacing.xs,
+            paddingBottom: insets.bottom + Spacing.xs,
+            paddingLeft: insets.left + Spacing.sm,
+            paddingRight: insets.right + Spacing.sm,
           },
         ]}
       >
@@ -77,7 +82,7 @@ export default function MenuScreen() {
                 >
                   <LinearGradient
                     colors={colors}
-                    style={styles.levelButtonGradient}
+                    style={[styles.levelButtonGradient, { width: buttonSize, height: buttonSize }]}
                   >
                     <View style={styles.levelImageWrapper}>
                       <Image
@@ -131,8 +136,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   levelButton: {
-    width: 90,
-    height: 90,
     borderRadius: 14,
     overflow: "hidden",
     shadowColor: "#000",

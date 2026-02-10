@@ -27,7 +27,12 @@
       "themeColor": "#1A1A2E",
       "backgroundColor": "#1A1A2E",
       "display": "standalone",
-      "orientation": "landscape"
+      "orientation": "landscape",
+      "name": "Maze Adventure",
+      "shortName": "Maze Game",
+      "description": "A fun and challenging maze swipe game.",
+      "lang": "en",
+      "startUrl": "/"
     },
     "plugins": [
       [
