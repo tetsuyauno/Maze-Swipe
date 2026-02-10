@@ -12,8 +12,31 @@ import { queryClient } from "@/lib/query-client";
 import RootStackNavigator from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { Platform } from "react-native";
 
 export default function App() {
+  React.useEffect(() => {
+    if (Platform.OS === "web") {
+      const style = document.createElement("style");
+      style.textContent = `
+        html, body, #root, [data-contents="true"] {
+          overflow: hidden !important;
+          height: 100% !important;
+          width: 100% !important;
+          position: fixed !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          touch-action: none !important;
+          -webkit-overflow-scrolling: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+      return () => {
+        document.head.removeChild(style);
+      };
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

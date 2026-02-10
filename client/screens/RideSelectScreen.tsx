@@ -5,6 +5,7 @@ import {
   Pressable,
   ImageBackground,
   Image,
+  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -38,7 +39,7 @@ interface IconButtonProps {
   label: string;
 }
 
-function AnimatedIconButton({ icon, isSelected, onPress, label }: IconButtonProps) {
+function AnimatedIconButton({ icon, isSelected, onPress, label, size }: IconButtonProps & { size: number }) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -57,6 +58,7 @@ function AnimatedIconButton({ icon, isSelected, onPress, label }: IconButtonProp
     <AnimatedPressable
       style={[
         styles.iconButton,
+        { width: size, height: size },
         isSelected && styles.iconButtonSelected,
         animatedStyle,
       ]}
@@ -88,7 +90,11 @@ export default function RideSelectScreen() {
   const route = useRoute<RideSelectRouteProp>();
   const { t } = useLanguage();
 
+  const { width, height } = Dimensions.get("window");
   const { level } = route.params;
+
+  const availableWidth = width - insets.left - insets.right - (Spacing.md * 2);
+  const buttonSize = Math.floor(Math.min(80, (availableWidth - (Spacing.sm * 5)) / 6));
   const [selectedIcon, setSelectedIcon] = useState<CarIconName>("submarine");
 
   const handleContinue = () => {
@@ -108,10 +114,10 @@ export default function RideSelectScreen() {
         style={[
           styles.content,
           {
-            paddingTop: insets.top + Spacing.sm,
-            paddingBottom: insets.bottom + Spacing.sm,
-            paddingLeft: insets.left + Spacing.md,
-            paddingRight: insets.right + Spacing.md,
+            paddingTop: insets.top + Spacing.xs,
+            paddingBottom: insets.bottom + Spacing.xs,
+            paddingLeft: insets.left + Spacing.sm,
+            paddingRight: insets.right + Spacing.sm,
           },
         ]}
       >
@@ -130,6 +136,7 @@ export default function RideSelectScreen() {
                 isSelected={selectedIcon === icon.name}
                 onPress={() => setSelectedIcon(icon.name)}
                 label={t(`ride.${icon.name}`)}
+                size={buttonSize}
               />
             ))}
           </View>
@@ -177,8 +184,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
   },
   iconButton: {
-    width: 70,
-    height: 70,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     justifyContent: "center",

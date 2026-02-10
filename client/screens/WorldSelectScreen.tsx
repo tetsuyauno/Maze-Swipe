@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Pressable,
   ImageBackground,
+  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -36,8 +37,12 @@ export default function WorldSelectScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<WorldSelectRouteProp>();
   const { t } = useLanguage();
-  
+
+  const { width, height } = Dimensions.get("window");
   const { level, carIcon } = route.params;
+
+  const availableWidth = width - insets.left - insets.right - (Spacing.md * 2);
+  const buttonSize = Math.floor(Math.min(100, (availableWidth - (Spacing.sm * 4)) / 5));
 
   const handleSelectWorld = (themeName: string) => {
     navigation.navigate("Game", {
@@ -57,20 +62,20 @@ export default function WorldSelectScreen() {
         style={[
           styles.content,
           {
-            paddingTop: insets.top + Spacing.sm,
-            paddingBottom: insets.bottom + Spacing.sm,
-            paddingLeft: insets.left + Spacing.md,
-            paddingRight: insets.right + Spacing.md,
+            paddingTop: insets.top + Spacing.xs,
+            paddingBottom: insets.bottom + Spacing.xs,
+            paddingLeft: insets.left + Spacing.sm,
+            paddingRight: insets.right + Spacing.sm,
           },
         ]}
       >
         <View style={styles.header}>
           <LanguageSwitch />
         </View>
-        
+
         <View style={styles.mainContent}>
           <ThemedText style={styles.title}>{t('world.title')}</ThemedText>
-          
+
           <View style={styles.worldGrid}>
             {themeKeys.map((key) => {
               const theme = MAZE_THEMES[key];
@@ -83,7 +88,7 @@ export default function WorldSelectScreen() {
                 >
                   <LinearGradient
                     colors={colors}
-                    style={styles.worldButtonGradient}
+                    style={[styles.worldButtonGradient, { width: buttonSize, height: buttonSize }]}
                   >
                     <View style={styles.worldPreview}>
                       <ImageBackground
@@ -146,8 +151,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   worldButton: {
-    width: 90,
-    height: 90,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
