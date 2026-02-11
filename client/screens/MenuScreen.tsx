@@ -8,7 +8,7 @@ import {
   ImageBackground,
   Dimensions,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
@@ -40,7 +40,8 @@ export default function MenuScreen() {
   const levels = [1, 2, 3, 4, 5];
 
   const availableWidth = width - insets.left - insets.right - (Spacing.md * 2);
-  const buttonSize = Math.floor(Math.min(90, (availableWidth - (Spacing.sm * 4)) / 5));
+  const buttonWidth = Math.floor(Math.min(130, (availableWidth - (Spacing.md * 2)) / 3));
+  const buttonHeight = buttonWidth * 1.3; // Make it taller than wide
 
   const handleSelectLevel = (level: number) => {
     navigation.navigate("RideSelect", { level });
@@ -52,61 +53,57 @@ export default function MenuScreen() {
       style={styles.container}
       resizeMode="cover"
     >
-      <View
-        style={[
-          styles.content,
-          {
-            paddingTop: insets.top + Spacing.xs,
-            paddingBottom: insets.bottom + Spacing.xs,
-            paddingLeft: insets.left + Spacing.sm,
-            paddingRight: insets.right + Spacing.sm,
-          },
-        ]}
-      >
-        <View style={styles.header}>
-          <LanguageSwitch />
-        </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <LanguageSwitch />
+          </View>
 
-        <View style={styles.mainContent}>
-          <ThemedText style={styles.title}>{t('menu.title')}</ThemedText>
+          <View style={styles.mainContent}>
+            <ThemedText style={styles.title}>{t('menu.title')}</ThemedText>
 
-          <View style={styles.levelGrid}>
-            {levels.map((level) => {
-              const sizeConfig = MAZE_SIZES[level];
-              const colors = LEVEL_COLORS[level];
-              return (
-                <Pressable
-                  key={level}
-                  style={styles.levelButton}
-                  onPress={() => handleSelectLevel(level)}
-                >
-                  <LinearGradient
-                    colors={colors}
-                    style={[styles.levelButtonGradient, { width: buttonSize, height: buttonSize }]}
+            <View style={styles.levelGrid}>
+              {levels.map((level) => {
+                const sizeConfig = MAZE_SIZES[level];
+                const colors = LEVEL_COLORS[level];
+                return (
+                  <Pressable
+                    key={level}
+                    style={styles.levelButton}
+                    onPress={() => handleSelectLevel(level)}
+                    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                   >
-                    <View style={styles.levelImageWrapper}>
-                      <Image
-                        source={LEVEL_IMAGES[level]}
-                        style={styles.levelImage}
-                        resizeMode="contain"
-                      />
-                    </View>
-                    <ThemedText style={styles.levelSize}>
-                      {sizeConfig.label}
-                    </ThemedText>
-                  </LinearGradient>
-                </Pressable>
-              );
-            })}
+                    <LinearGradient
+                      colors={colors}
+                      style={[styles.levelButtonGradient, { width: buttonWidth, height: buttonHeight }]}
+                    >
+                      <View style={styles.levelImageWrapper}>
+                        <Image
+                          source={LEVEL_IMAGES[level]}
+                          style={styles.levelImage}
+                          resizeMode="contain"
+                        />
+                      </View>
+                      <ThemedText style={styles.levelSize}>
+                        {sizeConfig.label}
+                      </ThemedText>
+                    </LinearGradient>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  safeArea: {
     flex: 1,
   },
   content: {
@@ -122,54 +119,58 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: "bold",
     color: "#2C3E50",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xl,
     textShadowColor: "rgba(255,255,255,0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   levelGrid: {
     flexDirection: "row",
-    gap: Spacing.sm,
+    flexWrap: "wrap",
+    gap: Spacing.xl,
     justifyContent: "center",
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.xl,
   },
   levelButton: {
-    borderRadius: 14,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: Spacing.md,
   },
   levelButtonGradient: {
-    flex: 1,
-    padding: 5,
+    padding: Spacing.md,
     alignItems: "center",
     justifyContent: "center",
   },
   levelImageWrapper: {
-    width: 55,
-    height: 45,
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
-    borderRadius: 10,
+    width: "85%",
+    height: "55%",
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
+    padding: 10,
   },
   levelImage: {
-    width: 40,
-    height: 40,
+    width: "90%",
+    height: "90%",
   },
   levelSize: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: "900",
     color: "#FFFFFF",
-    marginTop: 4,
-    textShadowColor: "rgba(0,0,0,0.2)",
+    marginTop: 12,
+    textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textShadowRadius: 3,
   },
 });

@@ -40,6 +40,27 @@ export const LEVEL_IMAGES: Record<number, any> = {
 };
 
 
+import { Dimensions } from "react-native";
+
+export const MAZE_BASE_SIZES: Record<number, { large: number; small: number; label: string }> = {
+  1: { large: 5, small: 3, label: "5 x 3" },
+  2: { large: 6, small: 4, label: "6 x 4" },
+  3: { large: 7, small: 5, label: "7 x 5" },
+  4: { large: 8, small: 5, label: "8 x 5" },
+  5: { large: 9, small: 6, label: "9 x 6" },
+};
+
+export function getDynamicMazeSize(level: number): { rows: number; cols: number } {
+  const { width, height } = Dimensions.get("window");
+  const isPortrait = height >= width;
+  const config = MAZE_BASE_SIZES[level] || MAZE_BASE_SIZES[1];
+
+  return {
+    rows: isPortrait ? config.large : config.small,
+    cols: isPortrait ? config.small : config.large,
+  };
+}
+
 export const MAZE_SIZES: Record<number, MazeSizeConfig> = {
   1: { rows: 3, cols: 5, label: "5 x 3", icon: "grid" },
   2: { rows: 4, cols: 6, label: "6 x 4", icon: "square" },
@@ -172,8 +193,7 @@ function getRandomStartPosition(rows: number, cols: number): Cell {
 
 export function generateMaze(level: number): MazeData {
   const clampedLevel = Math.max(1, Math.min(5, level));
-  const sizeConfig = MAZE_SIZES[clampedLevel];
-  const { rows, cols } = sizeConfig;
+  const { rows, cols } = getDynamicMazeSize(clampedLevel);
 
   const start = getRandomStartPosition(rows, cols);
   const grid = generateMazeFromCell(start.y, start.x, rows, cols);

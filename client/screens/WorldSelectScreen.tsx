@@ -6,7 +6,7 @@ import {
   ImageBackground,
   Dimensions,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -42,7 +42,7 @@ export default function WorldSelectScreen() {
   const { level, carIcon } = route.params;
 
   const availableWidth = width - insets.left - insets.right - (Spacing.md * 2);
-  const buttonSize = Math.floor(Math.min(100, (availableWidth - (Spacing.sm * 4)) / 5));
+  const buttonSize = Math.floor(Math.min(130, (availableWidth - (Spacing.md * 2)) / 3));
 
   const handleSelectWorld = (themeName: string) => {
     navigation.navigate("Game", {
@@ -58,64 +58,57 @@ export default function WorldSelectScreen() {
       style={styles.container}
       resizeMode="cover"
     >
-      <View
-        style={[
-          styles.content,
-          {
-            paddingTop: insets.top + Spacing.xs,
-            paddingBottom: insets.bottom + Spacing.xs,
-            paddingLeft: insets.left + Spacing.sm,
-            paddingRight: insets.right + Spacing.sm,
-          },
-        ]}
-      >
-        <View style={styles.header}>
-          <LanguageSwitch />
-        </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <LanguageSwitch />
+          </View>
 
-        <View style={styles.mainContent}>
-          <ThemedText style={styles.title}>{t('world.title')}</ThemedText>
+          <View style={styles.mainContent}>
+            <ThemedText style={styles.title}>{t('world.title')}</ThemedText>
 
-          <View style={styles.worldGrid}>
-            {themeKeys.map((key) => {
-              const theme = MAZE_THEMES[key];
-              const colors = THEME_COLORS[key] || ["#A8D5BA", "#7CB894"];
-              return (
-                <Pressable
-                  key={key}
-                  style={styles.worldButton}
-                  onPress={() => handleSelectWorld(key)}
-                >
-                  <LinearGradient
-                    colors={colors}
-                    style={[styles.worldButtonGradient, { width: buttonSize, height: buttonSize }]}
+            <View style={styles.worldGrid}>
+              {themeKeys.map((key) => {
+                const theme = MAZE_THEMES[key];
+                const colors = THEME_COLORS[key] || ["#A8D5BA", "#7CB894"];
+                return (
+                  <Pressable
+                    key={key}
+                    style={styles.worldButton}
+                    onPress={() => handleSelectWorld(key)}
+                    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                   >
-                    <View style={styles.worldPreview}>
-                      <ImageBackground
-                        source={theme.backgroundImage}
-                        style={styles.worldPreviewImage}
-                        imageStyle={styles.worldPreviewImageStyle}
-                        resizeMode="cover"
-                      >
-                        <View style={[styles.worldIconBg, { backgroundColor: "rgba(255,255,255,0.9)" }]}>
-                          <Feather
-                            name={theme.icon as any}
-                            size={20}
-                            color={theme.walls}
-                          />
-                        </View>
-                      </ImageBackground>
-                    </View>
-                    <ThemedText style={styles.worldLabel}>
-                      {t(`world.${key}`)}
-                    </ThemedText>
-                  </LinearGradient>
-                </Pressable>
-              );
-            })}
+                    <LinearGradient
+                      colors={colors}
+                      style={[styles.worldButtonGradient, { width: buttonSize, height: buttonSize }]}
+                    >
+                      <View style={styles.worldPreview}>
+                        <ImageBackground
+                          source={theme.backgroundImage}
+                          style={styles.worldPreviewImage}
+                          imageStyle={styles.worldPreviewImageStyle}
+                          resizeMode="cover"
+                        >
+                          <View style={[styles.worldIconBg, { backgroundColor: "rgba(255,255,255,0.9)" }]}>
+                            <Feather
+                              name={theme.icon as any}
+                              size={20}
+                              color={theme.walls}
+                            />
+                          </View>
+                        </ImageBackground>
+                      </View>
+                      <ThemedText style={styles.worldLabel}>
+                        {t(`world.${key}`)}
+                      </ThemedText>
+                    </LinearGradient>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 }
@@ -136,22 +129,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  safeArea: {
+    flex: 1,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     color: "#2C3E50",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xl,
     textShadowColor: "rgba(255,255,255,0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   worldGrid: {
     flexDirection: "row",
-    gap: Spacing.sm,
+    flexWrap: "wrap",
+    gap: Spacing.md,
     justifyContent: "center",
+    paddingHorizontal: Spacing.md,
   },
   worldButton: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -161,14 +159,14 @@ const styles = StyleSheet.create({
   },
   worldButtonGradient: {
     flex: 1,
-    padding: 5,
+    padding: 10,
     alignItems: "center",
     justifyContent: "center",
   },
   worldPreview: {
-    width: 55,
-    height: 50,
-    borderRadius: 10,
+    width: "80%",
+    height: "55%",
+    borderRadius: 14,
     overflow: "hidden",
     backgroundColor: "#FFFFFF",
   },
@@ -178,20 +176,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   worldPreviewImageStyle: {
-    borderRadius: 10,
+    borderRadius: 14,
   },
   worldIconBg: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: "center",
     alignItems: "center",
   },
   worldLabel: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "700",
     color: "#FFFFFF",
-    marginTop: 4,
+    marginTop: 8,
     textShadowColor: "rgba(0,0,0,0.2)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,

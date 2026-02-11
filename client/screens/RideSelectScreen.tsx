@@ -7,7 +7,7 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -63,6 +63,7 @@ function AnimatedIconButton({ icon, isSelected, onPress, label, size }: IconButt
         animatedStyle,
       ]}
       onPress={handlePress}
+      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
     >
       <Image
         source={icon.image}
@@ -94,7 +95,7 @@ export default function RideSelectScreen() {
   const { level } = route.params;
 
   const availableWidth = width - insets.left - insets.right - (Spacing.md * 2);
-  const buttonSize = Math.floor(Math.min(80, (availableWidth - (Spacing.sm * 5)) / 6));
+  const buttonSize = Math.floor(Math.min(110, (availableWidth - (Spacing.md * 2)) / 3));
   const [selectedIcon, setSelectedIcon] = useState<CarIconName>("submarine");
 
   const handleContinue = () => {
@@ -110,43 +111,39 @@ export default function RideSelectScreen() {
       style={styles.container}
       resizeMode="cover"
     >
-      <View
-        style={[
-          styles.content,
-          {
-            paddingTop: insets.top + Spacing.xs,
-            paddingBottom: insets.bottom + Spacing.xs,
-            paddingLeft: insets.left + Spacing.sm,
-            paddingRight: insets.right + Spacing.sm,
-          },
-        ]}
-      >
-        <View style={styles.header}>
-          <LanguageSwitch />
-        </View>
-
-        <View style={styles.mainContent}>
-          <ThemedText style={styles.title}>{t('ride.title')}</ThemedText>
-
-          <View style={styles.iconGrid}>
-            {CAR_ICONS.map((icon) => (
-              <AnimatedIconButton
-                key={icon.name}
-                icon={icon}
-                isSelected={selectedIcon === icon.name}
-                onPress={() => setSelectedIcon(icon.name)}
-                label={t(`ride.${icon.name}`)}
-                size={buttonSize}
-              />
-            ))}
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <LanguageSwitch />
           </View>
 
-          <Pressable style={styles.nextButton} onPress={handleContinue}>
-            <ThemedText style={styles.nextButtonText}>{t('ride.next')}</ThemedText>
-            <Feather name="arrow-right" size={18} color="#FFFFFF" />
-          </Pressable>
+          <View style={styles.mainContent}>
+            <ThemedText style={styles.title}>{t('ride.title')}</ThemedText>
+
+            <View style={styles.iconGrid}>
+              {CAR_ICONS.map((icon) => (
+                <AnimatedIconButton
+                  key={icon.name}
+                  icon={icon}
+                  isSelected={selectedIcon === icon.name}
+                  onPress={() => setSelectedIcon(icon.name)}
+                  label={t(`ride.${icon.name}`)}
+                  size={buttonSize}
+                />
+              ))}
+            </View>
+
+            <Pressable
+              style={styles.nextButton}
+              onPress={handleContinue}
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            >
+              <ThemedText style={styles.nextButtonText}>{t('ride.next')}</ThemedText>
+              <Feather name="arrow-right" size={18} color="#FFFFFF" />
+            </Pressable>
+          </View>
         </View>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 }
@@ -167,11 +164,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  safeArea: {
+    flex: 1,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     color: "#2C3E50",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xl,
     textShadowColor: "rgba(255,255,255,0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
@@ -179,13 +179,13 @@ const styles = StyleSheet.create({
   iconGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: Spacing.sm,
+    gap: Spacing.md,
     justifyContent: "center",
     paddingHorizontal: Spacing.md,
   },
   iconButton: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -206,10 +206,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   iconLabel: {
-    fontSize: 9,
+    fontSize: 12,
     color: MazeColors.textSecondary,
     fontWeight: "600",
-    marginTop: 2,
+    marginTop: 4,
     textAlign: "center",
   },
   iconLabelSelected: {
@@ -217,8 +217,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   iconImage: {
-    width: 36,
-    height: 36,
+    width: "60%",
+    height: "60%",
     opacity: 0.7,
   },
   iconImageSelected: {

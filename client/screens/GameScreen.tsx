@@ -9,7 +9,7 @@ import {
   ImageBackground,
   Image,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -152,13 +152,16 @@ export default function GameScreen() {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
 
-  const availableHeight = screenHeight - insets.top - insets.bottom;
-  const availableWidth = screenWidth - insets.left - insets.right;
+  const availableHeight = screenHeight - insets.top - insets.bottom - 100; // Leave space for headers/UI
+  const availableWidth = screenWidth - insets.left - insets.right - Spacing.md * 2;
 
   const cellSizeByHeight = Math.floor(availableHeight / currentMaze.rows);
   const cellSizeByWidth = Math.floor(availableWidth / currentMaze.cols);
   const cellSize = Math.min(cellSizeByHeight, cellSizeByWidth);
-  const iconSize = Math.floor(cellSize * 0.55);
+  const iconSize = Math.floor(cellSize * 0.65);
+
+  const mazeWidth = cellSize * currentMaze.cols;
+  const mazeHeight = cellSize * currentMaze.rows;
 
   const playerX = useSharedValue(currentMaze.start.x * cellSize);
   const playerY = useSharedValue(currentMaze.start.y * cellSize);
@@ -590,23 +593,29 @@ export default function GameScreen() {
       ]}
       resizeMode="cover"
     >
-      <View style={[
-        styles.contentWrapper,
-        {
-          paddingTop: insets.top,
-          paddingBottom: insets.bottom,
-          paddingLeft: insets.left,
-          paddingRight: insets.right,
-        },
-      ]}>
-        <Pressable style={styles.backToMenuButton} onPress={goToMenu}>
-          <Feather name="home" size={20} color="#FFFFFF" />
-        </Pressable>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <Pressable
+            style={styles.backToMenuButton}
+            onPress={goToMenu}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          >
+            <Feather name="home" size={24} color="#FFFFFF" />
+          </Pressable>
+        </View>
+
         <View style={styles.content}>
           <GestureDetector gesture={panGesture}>
             <View
               ref={gridViewRef}
-              style={[styles.gridWrapper, { borderColor: theme.walls }]}
+              style={[
+                styles.gridWrapper,
+                {
+                  borderColor: theme.walls,
+                  width: mazeWidth + WALL_THICKNESS * 2,
+                  height: mazeHeight + WALL_THICKNESS * 2,
+                }
+              ]}
               onLayout={updateGridPosition}
             >
               <View style={styles.gridContainer}>
@@ -652,7 +661,7 @@ export default function GameScreen() {
           <View style={styles.modalOverlay}>
             <Confetti />
             <View style={styles.modalContent}>
-              <View style={styles.modalLeft}>
+              <View style={styles.modalTop}>
                 <ThemedText style={styles.winTitle}>{t('game.amazing')}</ThemedText>
 
                 <ThemedText style={styles.movesSummary}>
@@ -662,18 +671,28 @@ export default function GameScreen() {
                   }
                 </ThemedText>
 
-                <Pressable style={styles.primaryButton} onPress={playNewMazeSameLevel}>
-                  <Feather name="refresh-cw" size={16} color="#FFFFFF" />
-                  <ThemedText style={styles.primaryButtonText}>{t('game.playAgain')}</ThemedText>
-                </Pressable>
+                <View style={styles.modalActions}>
+                  <Pressable
+                    style={styles.primaryButton}
+                    onPress={playNewMazeSameLevel}
+                    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                  >
+                    <Feather name="refresh-cw" size={16} color="#FFFFFF" />
+                    <ThemedText style={styles.primaryButtonText}>{t('game.playAgain')}</ThemedText>
+                  </Pressable>
 
-                <Pressable style={styles.menuButton} onPress={goToMenu}>
-                  <Feather name="home" size={14} color={MazeColors.textPrimary} />
-                  <ThemedText style={styles.menuButtonText}>{t('game.menu')}</ThemedText>
-                </Pressable>
+                  <Pressable
+                    style={styles.menuButton}
+                    onPress={goToMenu}
+                    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                  >
+                    <Feather name="home" size={14} color={MazeColors.textPrimary} />
+                    <ThemedText style={styles.menuButtonText}>{t('game.menu')}</ThemedText>
+                  </Pressable>
+                </View>
               </View>
 
-              <View style={styles.modalRight}>
+              <View style={styles.modalBottom}>
                 <ThemedText style={styles.sectionLabel}>{t('game.tryAnother')}</ThemedText>
                 <View style={styles.levelButtonsRow}>
                   {[1, 2, 3, 4, 5].filter(l => l !== level).map((lvl) => (
@@ -681,6 +700,7 @@ export default function GameScreen() {
                       key={lvl}
                       style={styles.levelButton}
                       onPress={() => playDifferentLevel(lvl)}
+                      hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
                     >
                       <View style={styles.levelImageWrapper}>
                         <Image
@@ -697,7 +717,7 @@ export default function GameScreen() {
             </View>
           </View>
         </Modal>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 }
@@ -707,24 +727,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: MazeColors.background,
   },
-  contentWrapper: {
+  safeArea: {
     flex: 1,
   },
+  header: {
+    flexDirection: "row",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
   backToMenuButton: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 10,
   },
   content: {
     flex: 1,
-    flexDirection: "row",
+    paddingHorizontal: Spacing.md,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -819,119 +843,132 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: Spacing.sm,
-    flexDirection: "row",
-    gap: Spacing.sm,
     width: "90%",
-    maxWidth: 550,
-    maxHeight: "90%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 32,
+    padding: Spacing.xl,
+    alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
-    overflow: "hidden",
+    shadowRadius: 20,
+    elevation: 10,
   },
-  modalLeft: {
-    flex: 1.1,
+  modalTop: {
     alignItems: "center",
-    paddingRight: Spacing.sm,
-    borderRightWidth: 1,
-    borderRightColor: "#F0F0F0",
-    minWidth: 120,
-    justifyContent: "center",
+    marginBottom: Spacing.xl,
+    width: "100%",
   },
-  modalRight: {
-    flex: 1,
-    alignItems: "center",
-    paddingLeft: Spacing.sm,
+  modalActions: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginTop: Spacing.lg,
     justifyContent: "center",
+    width: "100%",
+  },
+  modalBottom: {
+    width: "100%",
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+    paddingTop: Spacing.lg,
+    alignItems: "center",
   },
   levelImageWrapper: {
-    width: 40,
-    height: 32,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    borderRadius: 6,
+    width: 64,
+    height: 64,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: "#E9ECEF",
   },
   levelImage: {
-    width: 24,
-    height: 24,
+    width: "75%",
+    height: "75%",
   },
   winTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: MazeColors.success,
-    marginBottom: 4,
+    fontSize: 36,
+    fontWeight: "900",
+    color: MazeColors.player,
+    marginBottom: Spacing.xs,
+    textAlign: "center",
   },
   starsContainer: {
     flexDirection: "row",
-    marginBottom: 4,
+    marginBottom: 8,
   },
   star: {
-    marginHorizontal: 1,
+    marginHorizontal: 2,
   },
   movesSummary: {
-    fontSize: 10,
+    fontSize: 18,
     color: MazeColors.textSecondary,
+    fontWeight: "600",
     marginBottom: Spacing.sm,
     textAlign: "center",
   },
   primaryButton: {
     flexDirection: "row",
-    alignItems: "center",
     backgroundColor: MazeColors.player,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 6,
-    borderRadius: 15,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
     justifyContent: "center",
   },
   primaryButtonText: {
     color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "600",
-    marginLeft: 4,
+    fontSize: 16,
+    fontWeight: "bold",
   },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "700",
     color: MazeColors.textSecondary,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.md,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   levelButtonsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    gap: Spacing.xs,
-    maxWidth: 200,
+    gap: Spacing.md,
+    maxWidth: "100%",
   },
   levelButton: {
     backgroundColor: "#F8F8F8",
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 6,
-    borderRadius: 10,
+    paddingVertical: 10,
+    borderRadius: 16,
     alignItems: "center",
-    minWidth: 60,
+    minWidth: 80,
   },
   levelButtonLabel: {
-    fontSize: 10,
+    fontSize: 12,
+    fontWeight: "700",
     color: MazeColors.textSecondary,
-    marginTop: 2,
+    marginTop: 4,
   },
   menuButton: {
     flexDirection: "row",
+    backgroundColor: "#F0F0F0",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
     alignItems: "center",
-    marginTop: Spacing.sm,
-    paddingVertical: 4,
+    gap: 8,
+    flex: 1,
+    justifyContent: "center",
   },
   menuButtonText: {
     color: MazeColors.textPrimary,
-    fontSize: 12,
-    marginLeft: 4,
+    fontSize: 16,
+    fontWeight: "bold",
   },
   confettiContainer: {
     position: "absolute",
